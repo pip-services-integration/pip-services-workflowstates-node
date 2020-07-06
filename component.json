@@ -1,0 +1,6 @@
+{
+    "name": "pip-services-workflows-node",
+    "registry": "pipdev",
+    "version": "1.0.0",
+    "build": "0"
+}
