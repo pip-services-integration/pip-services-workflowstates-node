@@ -15,7 +15,7 @@
     "pip-services3-rpc-node": "^3.0.*",
     "pip-services3-mongodb-node": "^3.0.*",
     "pip-services3-messaging-node": "^3.0.*",
-    "typescript-string-operations": "^1.3.3"
+    "crypto": "^1.0.1"
   },
   "devDependencies": {
     "@types/async": "^2.0.49",

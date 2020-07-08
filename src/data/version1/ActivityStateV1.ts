@@ -2,7 +2,7 @@
 import { MessageEnvelope } from "pip-services3-messaging-node";
 
 /// The activity state
-export class ActivityDetailStateV1 {
+export class ActivityStateV1 {
     /// The type of workflow activity: Download, Upload, Close, Compensate, Transfer.
     public type: string;
 

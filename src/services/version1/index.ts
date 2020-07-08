@@ -1,1 +1,1 @@
-export { WorkflowDetailStatusHttpServiceV1 } from "./WorkflowDetailStatusHttpServiceV1";
+export { WorkflowStateHttpServiceV1 } from "./WorkflowStateHttpServiceV1";

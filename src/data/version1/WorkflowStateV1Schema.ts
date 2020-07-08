@@ -2,13 +2,13 @@
 import { ObjectSchema } from "pip-services3-commons-node";
 import { ArraySchema } from "pip-services3-commons-node";
 import { MessageEnvelopeV1Schema } from "./MessageEnvelopeV1Schema";
-import { ActivityDetailStateV1Schema } from "./ActivityDetailStateV1Schema";
+import { ActivityStateV1Schema } from "./ActivityStateV1Schema";
 
-export class WorkflowDetailStateV1Schema extends ObjectSchema {
+export class WorkflowStateV1Schema extends ObjectSchema {
     public WorkflowStatusV1Schema() {
         this.withOptionalProperty("id", TypeCode.String);
         this.withOptionalProperty("type", TypeCode.String);
-        this.withOptionalProperty("initiator_id", TypeCode.String);
+        this.withOptionalProperty("request_id", TypeCode.String);
         this.withOptionalProperty("key", TypeCode.String);
         this.withOptionalProperty("status", TypeCode.String);
         this.withOptionalProperty("start_time", TypeCode.DateTime);
@@ -23,7 +23,7 @@ export class WorkflowDetailStateV1Schema extends ObjectSchema {
         this.withOptionalProperty("attempt_count", TypeCode.Long);
         this.withOptionalProperty("lock_token", TypeCode.String);
         this.withOptionalProperty("locked_until_time", TypeCode.DateTime);
-        this.withOptionalProperty("activities", new ArraySchema(new ActivityDetailStateV1Schema()));
+        this.withOptionalProperty("activities", new ArraySchema(new ActivityStateV1Schema()));
         this.withOptionalProperty("data", TypeCode.Map);
     }
 }

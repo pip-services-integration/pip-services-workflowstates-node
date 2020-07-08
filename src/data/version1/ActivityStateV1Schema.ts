@@ -2,7 +2,7 @@
 import { ObjectSchema } from "pip-services3-commons-node";
 import { MessageEnvelopeV1Schema } from "./MessageEnvelopeV1Schema";
 
-export class ActivityDetailStateV1Schema extends ObjectSchema {
+export class ActivityStateV1Schema extends ObjectSchema {
     public ActivityStatusV1Schema() {
         this.withOptionalProperty("type", TypeCode.String);
         this.withOptionalProperty("status", TypeCode.String);

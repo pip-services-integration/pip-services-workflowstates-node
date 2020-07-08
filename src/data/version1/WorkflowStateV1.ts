@@ -1,8 +1,8 @@
 ﻿import { MessageEnvelope } from "pip-services3-messaging-node";
-import { ActivityDetailStateV1 } from "./ActivityDetailStateV1";
+import { ActivityStateV1 } from "./ActivityStateV1";
 
 /// Workflow status    
-export class WorkflowDetailStateV1 {
+export class WorkflowStateV1 {
     /// The unique auto-generated workflow id.
     public id: string;
 
@@ -10,7 +10,7 @@ export class WorkflowDetailStateV1 {
     public type: string;
 
     /// The external identificator for workflows without key, e.g. message id.
-    public initiator_id: string;
+    public request_id: string;
 
     /// The workflow identification key. It has to be unique within WorkflowType. 
     /// The key can be natural like PO# or artificial like "Product.FullSync".
@@ -58,13 +58,13 @@ export class WorkflowDetailStateV1 {
     public locked_until_time?: Date;
 
     /// The list of executed, completed and failed workflow activities.
-    public activities: Array<ActivityDetailStateV1> = new Array<ActivityDetailStateV1>();
+    public activities: Array<ActivityStateV1> = new Array<ActivityStateV1>();
 
     /// The workflow execution state. Using that state one activity can pass information to another activity.
     public data: Map<string, string> = new Map<string, string>();
 
     /// The workflow's compensation timeout.
-    public compensation_timeout?: TimeSpan;
+    public compensation_timeout?: number;
 
     /// Gets an object retrieved by its key and deserialized from JSON.
     ///  T

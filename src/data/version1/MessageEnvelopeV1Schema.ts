@@ -3,12 +3,12 @@ import { ObjectSchema } from "pip-services3-commons-node";
 
 export class MessageEnvelopeV1Schema extends ObjectSchema {
     public MessageEnvelopeV1Schema() {
-        this.withOptionalProperty("CorrelationId", TypeCode.String);
-        this.withOptionalProperty("MessageId", TypeCode.String);
-        this.withOptionalProperty("initiator_id", TypeCode.String);
-        this.withOptionalProperty("MessageType", TypeCode.String);
-        this.withOptionalProperty("SentTime", TypeCode.DateTime);
-        this.withOptionalProperty("Message", TypeCode.String);
+        this.withOptionalProperty("correlation_id", TypeCode.String);
+        this.withOptionalProperty("message_id", TypeCode.String);
+        this.withOptionalProperty("request_id", TypeCode.String);
+        this.withOptionalProperty("message_type", TypeCode.String);
+        this.withOptionalProperty("sent_time", TypeCode.DateTime);
+        this.withOptionalProperty("message", TypeCode.String);
     }
 }
 
