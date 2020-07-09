@@ -1,18 +1,19 @@
 {
     "compilerOptions": {
-        "declaration": true,
+		"declaration": true,
         "module": "commonjs",
         "target": "es6",
         "noImplicitAny": false,
         "outDir": "obj",
         "rootDir": ".",
         "sourceMap": true,
-        "types": [
-            "node", "mocha", "chai"
-        ]
+	"types": ["node", "mocha", "chai"] 
     },
     "exclude": [
         "node_modules",
-        "obj"
+        "lib",
+        "dist",
+        "obj",
+        "temp"
     ]
 }

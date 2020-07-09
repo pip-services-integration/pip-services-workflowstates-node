@@ -1,4 +1,4 @@
-export { IWorkflowStateCompositePersistence } from "./IWorkflowStateCompositePersistence";
-export { IWorkflowStatePersistence } from "./IWorkflowStatePersistence";
-export { PersistenceStorageType } from "./PersistenceStorageType";
-export { QueryAnalyzer } from "./QueryAnalyzer";
+// export { IWorkflowStatesPersistence } from './IWorkflowStatesPersistence';
+// export { WorkflowStatesMemoryPersistence } from './WorkflowStatesMemoryPersistence';
+// export { WorkflowStatesFilePersistence } from './WorkflowStatesFilePersistence';
+// export { WorkflowStatesMongoDbPersistence } from './WorkflowStatesMongoDbPersistence';

@@ -1,95 +1,33 @@
-﻿import { MessageEnvelope } from "pip-services3-messaging-node";
-import { ActivityStateV1 } from "./ActivityStateV1";
+import { IStringIdentifiable } from 'pip-services3-commons-node';
+import { IncomeItemV1 } from './IncomeItemV1';
+import { DeductionItemV1 } from './DeductionItemV1';
 
-/// Workflow status    
-export class WorkflowStateV1 {
-    /// The unique auto-generated workflow id.
+export class WorkflowStateV1 implements IStringIdentifiable {
     public id: string;
+    public number?: string;
+    public party_id: string;
+    public state?: string;
+    public state_details?: string;
 
-    /// The type of integration workflow: Replenishment, Backorder, Dropship.
-    public type: string;
+    public period_from?: Date;
+    public period_to?: Date;
 
-    /// The external identificator for workflows without key, e.g. message id.
-    public request_id: string;
+    public create_time?: Date;
+    public update_time?: Date;
+    public paid_time?: Date;
+    
+    public payment_method_id?: string;
+    public payment_id?: string;
+    public state_number?: string;
+    
+    public income?: IncomeItemV1[];
+    public income_total: number;
+    public ytd_income_total?: number;
 
-    /// The workflow identification key. It has to be unique within WorkflowType. 
-    /// The key can be natural like PO# or artificial like "Product.FullSync".
-    public key: string;
+    public deductions?: DeductionItemV1[];
+    public deductions_total?: number;
+    public ytd_deductions_total?: number;
 
-    /// The workflow execution state.
-    public status: string;
-
-    /// The time when workflow was started.
-    public start_time: Date;
-
-    /// The time when workflow completed or failed.
-    public end_time?: Date;
-
-    /// The time when last workflow activity was executed.
-    public last_action_time: Date;
-
-    /// The time when workflow shall expire.
-    public expiration_time: Date;
-
-    /// The information about request (e.g. error message).
-    public request: string;
-
-    /// The workflow's comment.
-    public comment: string;
-
-    /// The  time when workflow compensation shall be performed.
-    public compensation_time?: Date;
-
-    /// The local name of a queue where compensation message shall be sent.
-    public compensation_queue_name: string;
-
-    /// The message to be sent for compensation.
-    public compensation_message: MessageEnvelope;
-
-    /// GThe counter incremented after each compensation attempt. 
-    /// The counter is cleared on successful activity completion.
-    public attempt_count: number;
-
-    /// The unique lock token generated during workflow activation to prevent 
-    /// multiple activities performing parallel processing and causing concurrency issues.
-    public lock_token: string;
-
-    /// The locking expiration time.
-    public locked_until_time?: Date;
-
-    /// The list of executed, completed and failed workflow activities.
-    public activities: Array<ActivityStateV1> = new Array<ActivityStateV1>();
-
-    /// The workflow execution state. Using that state one activity can pass information to another activity.
-    public data: Map<string, string> = new Map<string, string>();
-
-    /// The workflow's compensation timeout.
-    public compensation_timeout?: number;
-
-    /// Gets an object retrieved by its key and deserialized from JSON.
-    ///  T
-    ///  key - The key.
-    public getDataAs<T>(key: string): T {
-        if (this.data[key]) {
-            return JSON.parse(this.data[key]) as T;
-        }
-
-        return  {} as T;
-    }
-
-    /// Sets an object into workflow state by its key. Before storage the object is serialized into JSON.
-    /// key The key.
-    /// value The value.
-    public setData(key: string, value: any) {
-        if (value != null) {
-            this.data[key] = JSON.parse(value);
-        } else {
-            delete this.data[key];
-        }
-    }
-
-    public toString(): string {
-        return "[{" + this.id + "},{" + this.type + "},{" + this.status + "}]";
-    }
+    public net_total: number;
+    public ytd_net_total?: number;
 }
-

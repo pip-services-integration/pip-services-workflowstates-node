@@ -1,6 +1,6 @@
 {
-    "name": "pip-services-workflows-node",
-    "registry": "pipdev",
+    "name": "pip-services-workflowstates-node",
     "version": "1.0.0",
-    "build": "0"
+    "registry": "pipdevs",
+    "build": 15
 }
