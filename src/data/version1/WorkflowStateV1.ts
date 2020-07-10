@@ -28,7 +28,7 @@ export class WorkflowStateV1 implements IStringIdentifiable {
     /// <summary>The workflow's comment.</summary>
     public comment?: string;
     /// <summary>The  time when workflow compensation shall be performed (UTC).</summary>
-    public compensation_time?: string;
+    public compensation_time?: Date;
     /// <summary>The local name of a queue where compensation message shall be sent.</summary>
     public compensation_queue_name?: string;
     /// <summary>The message to be sent for compensation.</summary>
