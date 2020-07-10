@@ -5,16 +5,16 @@ import { PagingParams } from 'pip-services3-commons-node';
 import { DataPage } from 'pip-services3-commons-node';
 import { IdentifiableMongoDbPersistence } from 'pip-services3-mongodb-node';
 
-import { WorkflowStateV1 } from '../data/version1/WorkflowStateV1';
-import { WorkflowStatusV1 } from '../data/version1/WorkflowStatusV1';
-import { IWorkflowStatesPersistence } from './IWorkflowStatesPersistence';
+import { ProcessStateV1 } from '../data/version1/ProcessStateV1';
+import { ProcessStatusV1 } from '../data/version1/ProcessStatusV1';
+import { IProcessStatesPersistence } from './IProcessStatesPersistence';
 
-export class WorkflowStatesMongoDbPersistence
-    extends IdentifiableMongoDbPersistence<WorkflowStateV1, string>
-    implements IWorkflowStatesPersistence {
+export class ProcessStatesMongoDbPersistence
+    extends IdentifiableMongoDbPersistence<ProcessStateV1, string>
+    implements IProcessStatesPersistence {
 
     public constructor(name?: string) {
-        super(name || 'workflows');
+        super(name || 'processes');
         super.ensureIndex({ start_time: -1 });
     }
     
@@ -49,9 +49,9 @@ export class WorkflowStatesMongoDbPersistence
         if (status != null)
             criteria.push({ status: status });
 
-        let compensated = filter.getAsNullableBoolean('compensated');
-        if (compensated == true)
-            criteria.push({ compensation_time: { $lt: new Date() } });
+        let recoverd = filter.getAsNullableBoolean('recoverd');
+        if (recoverd == true)
+            criteria.push({ recovery_time: { $lt: new Date() } });
 
         let expired = filter.getAsNullableBoolean('expired');
         if (expired == true)
@@ -80,17 +80,17 @@ export class WorkflowStatesMongoDbPersistence
     }
     
     public getPageByFilter(correlationId: string, filter: FilterParams, paging: PagingParams,
-        callback: (err: any, page: DataPage<WorkflowStateV1>) => void): void {
+        callback: (err: any, page: DataPage<ProcessStateV1>) => void): void {
         super.getPageByFilter(correlationId, this.composeFilter(filter), paging, '-start_time', null, callback);
     }
 
-    public getOpenById(correlationId: string, id: string, 
-        callback: (err: any, item: WorkflowStateV1) => void): void {
+    public getActiveById(correlationId: string, id: string, 
+        callback: (err: any, item: ProcessStateV1) => void): void {
         let filter = { 
             $and: [
                 { _id: id },
-                { status: { $ne: WorkflowStatusV1.Aborted } },
-                { status: { $ne: WorkflowStatusV1.Completed } }
+                { status: { $ne: ProcessStatusV1.Aborted } },
+                { status: { $ne: ProcessStatusV1.Completed } }
             ]
         };
 
@@ -105,35 +105,35 @@ export class WorkflowStatesMongoDbPersistence
         });    
     }
 
-    public getOpenByKey(correlationId: string, workflowType: string, workflowKey: string, 
-        callback: (err: any, item: WorkflowStateV1) => void): void {
+    public getActiveByKey(correlationId: string, processType: string, processKey: string, 
+        callback: (err: any, item: ProcessStateV1) => void): void {
         let filter = { 
             $and: [
-                { type: workflowType },
-                { key: workflowKey },
-                { status: { $ne: WorkflowStatusV1.Aborted } },
-                { status: { $ne: WorkflowStatusV1.Completed } }
+                { type: processType },
+                { key: processKey },
+                { status: { $ne: ProcessStatusV1.Aborted } },
+                { status: { $ne: ProcessStatusV1.Completed } }
             ]
         };
 
         this._collection.findOne(filter, (err, item) => {
             if (item == null)
-                this._logger.trace(correlationId, "Nothing found from %s with type = %s and key = %s", this._collectionName, workflowType, workflowKey);
+                this._logger.trace(correlationId, "Nothing found from %s with type = %s and key = %s", this._collectionName, processType, processKey);
             else
-                this._logger.trace(correlationId, "Retrieved from %s with type = %s and key = %s", this._collectionName, workflowType, workflowKey);
+                this._logger.trace(correlationId, "Retrieved from %s with type = %s and key = %s", this._collectionName, processType, processKey);
 
             item = this.convertToPublic(item);
             callback(err, item);
         });    
     }
 
-    public getOpenByInitiatorId(correlationId: string, initiatorId: string, 
-        callback: (err: any, item: WorkflowStateV1) => void): void {
+    public getActiveByInitiatorId(correlationId: string, initiatorId: string, 
+        callback: (err: any, item: ProcessStateV1) => void): void {
         let filter = { 
             $and: [
                 { initiator_id: initiatorId },
-                { status: { $ne: WorkflowStatusV1.Aborted } },
-                { status: { $ne: WorkflowStatusV1.Completed } }
+                { status: { $ne: ProcessStatusV1.Aborted } },
+                { status: { $ne: ProcessStatusV1.Completed } }
             ]
         };
 
@@ -152,8 +152,8 @@ export class WorkflowStatesMongoDbPersistence
         callback: (err: any) => void): void {
             let filter = { 
                 $or: [
-                    { status: WorkflowStatusV1.Aborted },
-                    { status: WorkflowStatusV1.Completed }
+                    { status: ProcessStatusV1.Aborted },
+                    { status: ProcessStatusV1.Completed }
                 ]
             };
             super.deleteByFilter(correlationId, filter, callback);

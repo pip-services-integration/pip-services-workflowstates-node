@@ -1,7 +1,7 @@
-# <img src="https://github.com/pip-services/pip-services/raw/master/design/Logo.png" alt="Pip.Services Logo" style="max-width:30%"> <br/> Workflow states microservice
+# <img src="https://github.com/pip-services/pip-services/raw/master/design/Logo.png" alt="Pip.Services Logo" style="max-width:30%"> <br/> Process states microservice
 
-This is workflow states microservice from Pip.Services library. 
-It stores customer workflow states internally or in external PCI-complient service like Paypal
+This is process states microservice from Pip.Services library. 
+It stores customer process states internally or in external PCI-complient service like Paypal
 
 The microservice currently supports the following deployment options:
 * Deployment platforms: Standalone Process, Seneca
@@ -17,7 +17,7 @@ This microservice has no dependencies on other microservices.
 * [Configuration Guide](doc/Configuration.md)
 * [Deployment Guide](doc/Deployment.md)
 * Client SDKs
-  - [Node.js SDK](https://github.com/pip-services/pip-clients-workflowstates-node)
+  - [Node.js SDK](https://github.com/pip-services/pip-clients-processstates-node)
 * Communication Protocols
   - [HTTP Version 1](doc/HttpProtocolV1.md)
   - [Seneca Version 1](doc/SenecaProtocolV1.md)
@@ -38,7 +38,7 @@ class AddressV1 {
     public country_code: string; // ISO 3166-1
 }
 
-class WorkflowStateV1 implements IStringIdentifiable {
+class ProcessStateV1 implements IStringIdentifiable {
     public id: string;
     public customer_id: string;
 
@@ -60,7 +60,7 @@ class WorkflowStateV1 implements IStringIdentifiable {
     public default?: boolean;
 }
 
-class WorkflowStateTypeV1 {
+class ProcessStateTypeV1 {
     public static readonly Visa = "visa";
     public static readonly Masterstate = "masterstate";
     public static readonly AmericanExpress = "amex";
@@ -68,26 +68,26 @@ class WorkflowStateTypeV1 {
     public static readonly Maestro = "maestro";
 }
 
-class WorkflowStateStateV1 {
+class ProcessStateStateV1 {
     public static Ok: string = "ok";
     public static Expired: string = "expired";
 }
 
-interface IWorkflowStatesV1 {
+interface IProcessStatesV1 {
     getStates(correlationId: string, filter: FilterParams, paging: PagingParams, 
-        callback: (err: any, page: DataPage<WorkflowStateV1>) => void): void;
+        callback: (err: any, page: DataPage<ProcessStateV1>) => void): void;
 
     getStateById(correlationId: string, state_id: string, 
-        callback: (err: any, state: WorkflowStateV1) => void): void;
+        callback: (err: any, state: ProcessStateV1) => void): void;
 
-    createState(correlationId: string, state: WorkflowStateV1, 
-        callback: (err: any, state: WorkflowStateV1) => void): void;
+    createState(correlationId: string, state: ProcessStateV1, 
+        callback: (err: any, state: ProcessStateV1) => void): void;
 
-    updateState(correlationId: string, state: WorkflowStateV1, 
-        callback: (err: any, state: WorkflowStateV1) => void): void;
+    updateState(correlationId: string, state: ProcessStateV1, 
+        callback: (err: any, state: ProcessStateV1) => void): void;
 
     deleteStateById(correlationId: string, state_id: string,
-        callback: (err: any, state: WorkflowStateV1) => void): void;
+        callback: (err: any, state: ProcessStateV1) => void): void;
 }
 ```
 
@@ -95,7 +95,7 @@ interface IWorkflowStatesV1 {
 
 Right now the only way to get the microservice is to state it out directly from github repository
 ```bash
-git clone git@github.com:pip-services-integration/pip-services-workflowstates-node.git
+git clone git@github.com:pip-services-integration/pip-services-processstates-node.git
 ```
 
 Pip.Service team is working to implement packaging and make stable releases available for your 
@@ -109,18 +109,18 @@ As the starting point you can use example configuration from **config.example.ym
 Example of microservice configuration
 ```yaml
 - descriptor: "pip-services-container:container-info:default:default:1.0"
-  name: "pip-services-workflowstates"
-  description: "WorkflowStates microservice"
+  name: "pip-services-processstates"
+  description: "ProcessStates microservice"
 
 - descriptor: "pip-services-commons:logger:console:default:1.0"
   level: "trace"
 
-- descriptor: "pip-services-workflowstates:persistence:file:default:1.0"
-  path: "./data/workflow_states.json"
+- descriptor: "pip-services-processstates:persistence:file:default:1.0"
+  path: "./data/process_states.json"
 
-- descriptor: "pip-services-workflowstates:controller:default:default:1.0"
+- descriptor: "pip-services-processstates:controller:default:default:1.0"
 
-- descriptor: "pip-services-workflowstates:service:http:default:1.0"
+- descriptor: "pip-services-processstates:service:http:default:1.0"
   connection:
     protocol: "http"
     host: "0.0.0.0"
@@ -145,7 +145,7 @@ If you use Node.js then you should add dependency to the client SDK into **packa
     ...
     "dependencies": {
         ....
-        "pip-clients-workflowstates-node": "^1.1.*",
+        "pip-clients-processstates-node": "^1.1.*",
         ...
     }
 }
@@ -153,7 +153,7 @@ If you use Node.js then you should add dependency to the client SDK into **packa
 
 Inside your code get the reference to the client SDK
 ```javascript
-var sdk = new require('pip-clients-workflowstates-node');
+var sdk = new require('pip-clients-processstates-node');
 ```
 
 Define client configuration parameters that match configuration of the microservice external API
@@ -168,13 +168,13 @@ var config = {
 };
 ```
 
-Instantiate the client and open connection to the microservice
+Instantiate the client and active connection to the microservice
 ```javascript
 // Create the client instance
-var client = sdk.WorkflowStatesHttpClientV1(config);
+var client = sdk.ProcessStatesHttpClientV1(config);
 
 // Connect to the microservice
-client.open(null, function(err) {
+client.active(null, function(err) {
     if (err) {
         console.error('Connection to the microservice failed');
         console.error(err);
@@ -188,8 +188,8 @@ client.open(null, function(err) {
 
 Now the client is ready to perform operations
 ```javascript
-// Create a new workflow_state
-var workflow_state = {
+// Create a new process_state
+var process_state = {
     customer_id: '1',
     type: 'visa',
     number: '1111111111111111',
@@ -212,15 +212,15 @@ var workflow_state = {
 
 client.createState(
     null,
-    workflow_state,
-    function (err, workflow_state) {
+    process_state,
+    function (err, process_state) {
         ...
     }
 );
 ```
 
 ```javascript
-// Get the list of workflow_states on 'time management' topic
+// Get the list of process_states on 'time management' topic
 client.getStates(
     null,
     {

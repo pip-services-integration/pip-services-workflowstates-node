@@ -1,7 +1,7 @@
-let WorkflowStatesProcess = require('../obj/src/container/WorkflowStatesProcess').WorkflowStatesProcess;
+let ProcessStatesProcess = require('../obj/src/container/ProcessStatesProcess').ProcessStatesProcess;
 
 try {
-    new WorkflowStatesProcess().run(process.argv);
+    new ProcessStatesProcess().run(process.argv);
 } catch (ex) {
     console.error(ex);
 }

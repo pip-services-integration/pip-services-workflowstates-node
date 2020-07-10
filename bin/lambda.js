@@ -1,3 +1,3 @@
-let WorkflowStatesLambdaFunction = require('../obj/src/container/WorkflowStatesLambdaFunction').WorkflowStatesLambdaFunction;
+let ProcessStatesLambdaFunction = require('../obj/src/container/ProcessStatesLambdaFunction').ProcessStatesLambdaFunction;
 
-module.exports = new WorkflowStatesLambdaFunction().getHandler();
+module.exports = new ProcessStatesLambdaFunction().getHandler();

@@ -1,1 +1,0 @@
-{"version":3,"file":"WorkflowInvalidStateExceptionV1.js","sourceRoot":"","sources":["../../../../src/data/version1/WorkflowInvalidStateExceptionV1.ts"],"names":[],"mappings":";;AAAA,+DAA4D;AAE5D,MAAa,+BAAgC,SAAQ,yCAAmB;IAEvE;;;;;OAKG;IACA,YAAmB,gBAAwB,IAAI,EAC3C,UAAkB,8BAA8B;QACtD,KAAK,CAAC,aAAa,EAAE,kBAAkB,EAAE,OAAO,CAAC,CAAC;IACnD,CAAC;CACD;AAZD,0EAYC"}

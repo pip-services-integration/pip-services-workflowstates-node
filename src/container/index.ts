@@ -1,2 +1,2 @@
-// export { WorkflowStatesProcess } from './WorkflowStatesProcess';
-// export { WorkflowStatesLambdaFunction } from './WorkflowStatesLambdaFunction';
+// export { ProcessStatesProcess } from './ProcessStatesProcess';
+// export { ProcessStatesLambdaFunction } from './ProcessStatesLambdaFunction';

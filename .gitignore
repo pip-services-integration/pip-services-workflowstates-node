@@ -1,7 +1,7 @@
 /node_modules
 /npm-debug.log
 /.idea
-/data/workflow_states.test.json
-/data/workflow_states.json
+/data/process_states.test.json
+/data/process_states.json
 /obj/test
 /docker/id_rsa*

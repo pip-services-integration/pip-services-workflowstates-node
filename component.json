@@ -1,5 +1,5 @@
 {
-    "name": "pip-services-workflowstates-node",
+    "name": "pip-services-processstates-node",
     "version": "1.0.0",
     "registry": "pipdevs",
     "build": 15

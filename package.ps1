@@ -22,7 +22,7 @@ try {
     # Test using curl
     Start-Sleep -Seconds 10
     Invoke-WebRequest -Uri http://localhost:8080/heartbeat
-    #Invoke-WebRequest -Uri http://localhost:8080/v1/workflow_states/get_states
+    #Invoke-WebRequest -Uri http://localhost:8080/v1/process_states/get_states
 
     Write-Host "The container was successfully built."
 } finally {

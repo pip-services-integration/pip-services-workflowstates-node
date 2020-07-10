@@ -1,8 +1,8 @@
 ---
 # Container descriptor
 - descriptor: "pip-services:context-info:default:default:1.0"
-  name: "pip-services-workflowstates"
-  description: "Workflowstates microservice for pip-services"
+  name: "pip-services-processstates"
+  description: "Processestates microservice for pip-services"
 
 # Console logger
 - descriptor: "pip-services:logger:console:default:1.0"
@@ -14,19 +14,19 @@
 
 {{#if MEMORY_ENABLED}}
 # In-memory persistence. Use only for testing!
-- descriptor: "pip-services-workflowstates:persistence:memory:default:1.0"
+- descriptor: "pip-services-processstates:persistence:memory:default:1.0"
 {{/if}}
 
 {{#if FILE_ENABLED}}
 # File persistence. Use it for testing of for simple standalone deployments
-- descriptor: "pip-services-workflowstates:persistence:file:default:1.0"
-  path: {{FILE_PATH}}{{#unless FILE_PATH}}"../data/workflow_states.json"{{/unless}}
+- descriptor: "pip-services-processstates:persistence:file:default:1.0"
+  path: {{FILE_PATH}}{{#unless FILE_PATH}}"../data/process_states.json"{{/unless}}
 {{/if}}
 
 {{#if MONGO_ENABLED}}
 # MongoDB Persistence
-- descriptor: "pip-services-workflowstates:persistence:mongodb:default:1.0"
-  collection: {{MONGO_COLLECTION}}{{#unless MONGO_COLLECTION}}workflow_states{{/unless}}
+- descriptor: "pip-services-processstates:persistence:mongodb:default:1.0"
+  collection: {{MONGO_COLLECTION}}{{#unless MONGO_COLLECTION}}process_states{{/unless}}
   connection:
     uri: {{{MONGO_SERVICE_URI}}}
     host: {{{MONGO_SERVICE_HOST}}}{{#unless MONGO_SERVICE_HOST}}localhost{{/unless}}
@@ -39,7 +39,7 @@
 
 {{#if PAYPAL_ENABLED}}
 # PayPal persistence
-- descriptor: "pip-services-workflowstates:persistence:paypal:default:*"
+- descriptor: "pip-services-processstates:persistence:paypal:default:*"
   credential:
     access_id: "{{PAYPAL_ACCESS_ID}}"
     access_key: "{{PAYPAL_ACCESS_KEY}}"
@@ -47,11 +47,11 @@
 
 {{#unless MEMORY_ENABLED}}{{#unless FILE_ENABLED}}{{#unless MONGO_ENABLED}}{{#unless PAYPAL_ENABLED}}
 # Default in-memory persistence
-- descriptor: "pip-services-workflowstates:persistence:memory:default:1.0"
+- descriptor: "pip-services-processstates:persistence:memory:default:1.0"
 {{/unless}}{{/unless}}{{/unless}}{{/unless}}
 
 # Default controller
-- descriptor: "pip-services-workflowstates:controller:default:default:1.0"
+- descriptor: "pip-services-processstates:controller:default:default:1.0"
 
 # Common HTTP endpoint
 - descriptor: "pip-services:endpoint:http:default:1.0"
@@ -61,7 +61,7 @@
     port: 8080
 
 # HTTP endpoint version 1.0
-- descriptor: "pip-services-workflowstates:service:http:default:1.0"
+- descriptor: "pip-services-processstates:service:http:default:1.0"
 
 # Heartbeat service
 - descriptor: "pip-services:heartbeat-service:http:default:1.0"

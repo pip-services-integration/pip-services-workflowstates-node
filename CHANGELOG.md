@@ -1,4 +1,4 @@
-# Workflow States Microservice ChangeLog
+# Process States Microservice ChangeLog
 
 ## <a name="1.0.0"></a> 1.0.0 (2018-01-16)
 

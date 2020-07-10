@@ -1,8 +1,8 @@
 {
-    "name": "pip-services-workflowstates-node",
-    "version": "1.0.1",
+    "name": "pip-services-processstates-node",
+    "version": "1.0.0",
     "author": "Conceptual Vision Consulting LLC",
-    "description": "Workflow states microservice in Node.js",
+    "description": "Process states microservice in Node.js",
     "contributors": [
         {
             "name": "Sergey Seroukhov",
@@ -13,13 +13,13 @@
     "typings": "./obj/src/index.d.ts",
     "keywords": [
         "pip.services",
-        "workflow state",
+        "process state",
         "microservice"
     ],
     "noAnalyze": true,
     "repository": {
         "type": "git",
-        "url": "ssh://git@github.com:pip-services-integration/pip-services-workflowstates-node.git"
+        "url": "ssh://git@github.com:pip-services-integration/pip-services-processstates-node.git"
     },
     "license": "MIT",
     "engines": {
@@ -37,7 +37,6 @@
         "rebenchmark": "tsc && matcha -R clean -I tdd ./obj/benchmark/run.js"
     },
     "dependencies": {
-        "paypal-rest-sdk": "*",
         "pip-services3-commons-node": "^3.0.0",
         "pip-services3-components-node": "^3.0.0",
         "pip-services3-container-node": "^3.0.0",

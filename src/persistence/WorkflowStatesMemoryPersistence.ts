@@ -5,13 +5,13 @@ import { PagingParams } from 'pip-services3-commons-node';
 import { DataPage } from 'pip-services3-commons-node';
 import { IdentifiableMemoryPersistence } from 'pip-services3-data-node';
 
-import { WorkflowStateV1 } from '../data/version1/WorkflowStateV1';
-import { IWorkflowStatesPersistence } from './IWorkflowStatesPersistence';
-import { WorkflowStatusV1 } from '../data/version1';
+import { ProcessStateV1 } from '../data/version1/ProcessStateV1';
+import { IProcessStatesPersistence } from './IProcessStatesPersistence';
+import { ProcessStatusV1 } from '../data/version1';
 
-export class WorkflowStatesMemoryPersistence 
-    extends IdentifiableMemoryPersistence<WorkflowStateV1, string> 
-    implements IWorkflowStatesPersistence {
+export class ProcessStatesMemoryPersistence 
+    extends IdentifiableMemoryPersistence<ProcessStateV1, string> 
+    implements IProcessStatesPersistence {
 
     constructor() {
         super();
@@ -31,7 +31,7 @@ export class WorkflowStatesMemoryPersistence
         return value.toLowerCase().indexOf(search.toLowerCase()) >= 0;
     }
 
-    private matchSearch(status: WorkflowStateV1, search: string): boolean {
+    private matchSearch(status: ProcessStateV1, search: string): boolean {
         if (this.matchString(status.id, search))
             return true;
         if (this.matchString(status.type, search))
@@ -51,7 +51,7 @@ export class WorkflowStatesMemoryPersistence
         let status = filter.getAsNullableString('status');
         let statuses = this.toStringArray(filter.getAsNullableString('statuses'));
         let key = filter.getAsNullableString('key');
-        let compensated = filter.getAsNullableBoolean('compensated');
+        let recoverd = filter.getAsNullableBoolean('recoverd');
         let expired = filter.getAsNullableBoolean('expired');
         let fromTime = filter.getAsNullableDateTime('from_time');
         let toTime = filter.getAsNullableDateTime('to_time');
@@ -59,7 +59,7 @@ export class WorkflowStatesMemoryPersistence
 
         let now = new Date().getTime();
         
-        return (item: WorkflowStateV1) => {
+        return (item: ProcessStateV1) => {
             if (id && item.id != id) 
                 return false;
             if (type && item.type != type) 
@@ -70,7 +70,7 @@ export class WorkflowStatesMemoryPersistence
                 return false;
             if (key && item.key != key) 
                 return false;
-            if (compensated == true && (item.compensation_time == null || item.compensation_time.getTime() >= now)) 
+            if (recoverd == true && (item.recovery_time == null || item.recovery_time.getTime() >= now)) 
                 return false;
             if (expired == true && (item.expiration_time == null || item.expiration_time.getTime() >= now)) 
                 return false;
@@ -85,15 +85,15 @@ export class WorkflowStatesMemoryPersistence
     }
 
     public getPageByFilter(correlationId: string, filter: FilterParams, paging: PagingParams,
-        callback: (err: any, page: DataPage<WorkflowStateV1>) => void): void {
+        callback: (err: any, page: DataPage<ProcessStateV1>) => void): void {
         super.getPageByFilter(correlationId, this.composeFilter(filter), paging, null, null, callback);
     }
             
-    public getOpenById(correlationId: string, id: string, 
-        callback: (err: any, item: WorkflowStateV1) => void): void {
+    public getActiveById(correlationId: string, id: string, 
+        callback: (err: any, item: ProcessStateV1) => void): void {
         let items = this._items.filter((x) => {
             return x.id == id
-                && (x.status != WorkflowStatusV1.Aborted && x.status != WorkflowStatusV1.Completed);
+                && (x.status != ProcessStatusV1.Aborted && x.status != ProcessStatusV1.Completed);
         });
         let item = items.length > 0 ? items[0] : null;
 
@@ -106,28 +106,28 @@ export class WorkflowStatesMemoryPersistence
     
     }
 
-    public getOpenByKey(correlationId: string, workflowType: string, workflowKey: string, 
-        callback: (err: any, item: WorkflowStateV1) => void): void {
+    public getActiveByKey(correlationId: string, processType: string, processKey: string, 
+        callback: (err: any, item: ProcessStateV1) => void): void {
         let items = this._items.filter((x) => {
-            return x.type == workflowType && x.key == workflowKey
-                && (x.status != WorkflowStatusV1.Aborted && x.status != WorkflowStatusV1.Completed);
+            return x.type == processType && x.key == processKey
+                && (x.status != ProcessStatusV1.Aborted && x.status != ProcessStatusV1.Completed);
         });
         let item = items.length > 0 ? items[0] : null;
 
         if (item != null)
-            this._logger.trace(correlationId, "Retrieved item %s and %s", workflowType, workflowKey);
+            this._logger.trace(correlationId, "Retrieved item %s and %s", processType, processKey);
         else
-            this._logger.trace(correlationId, "Cannot find item by %s and %s", workflowType, workflowKey);
+            this._logger.trace(correlationId, "Cannot find item by %s and %s", processType, processKey);
 
         callback(null, item);
     
     }
 
-    public getOpenByInitiatorId(correlationId: string, initiatorId: string, 
-        callback: (err: any, item: WorkflowStateV1) => void): void {
+    public getActiveByInitiatorId(correlationId: string, initiatorId: string, 
+        callback: (err: any, item: ProcessStateV1) => void): void {
         let items = this._items.filter((x) => {
             return x.initiator_id == initiatorId
-                && (x.status != WorkflowStatusV1.Aborted && x.status != WorkflowStatusV1.Completed);
+                && (x.status != ProcessStatusV1.Aborted && x.status != ProcessStatusV1.Completed);
         });
         let item = items.length > 0 ? items[0] : null;
 
@@ -141,9 +141,9 @@ export class WorkflowStatesMemoryPersistence
             
     public truncate(correlationId: string, timeout: number,
         callback: (err: any) => void): void {
-        let filterFunc = (item: WorkflowStateV1): boolean => {
-            return item.status == WorkflowStatusV1.Completed
-                || item.status == WorkflowStatusV1.Aborted;
+        let filterFunc = (item: ProcessStateV1): boolean => {
+            return item.status == ProcessStatusV1.Completed
+                || item.status == ProcessStatusV1.Aborted;
         }
         super.deleteByFilter(correlationId, filterFunc, callback);
     }

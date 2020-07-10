@@ -1,7 +1,7 @@
 FROM pipdevs/ts-dev:3.6.2
 
 # Install git and ssh
-RUN apk update && apk add git && apk add openssh
+RUN apk update && apk add git && apk add activessh
 
 # Copy local ssh keys
 COPY docker/id_rsa /root/.ssh/
