@@ -1,5 +1,5 @@
 ﻿
-import { IReferences } from 'pip-services3-commons-node';
+import { IReferences, Descriptor } from 'pip-services3-commons-node';
 import { ILogger } from 'pip-services3-components-node';
 import { CompositeLogger } from 'pip-services3-components-node';
 import { RecoveryManager } from './RecoveryManager';
@@ -40,7 +40,8 @@ export class RecoveryController {
         }
 
         var queue = status.recovery_queue_name != null
-            ? this._references.getOneRequired<IMessageQueue>(KnownDescriptor.MessageQueue(status.recovery_queue_name)) : null;
+        // TODO: must change mechanism of geting queues
+            ? this._references.getOneRequired<IMessageQueue>(new Descriptor("*", "queue","*", status.recovery_queue_name, "1.0")) : null;
         if (queue == null) {
             this._logger.error(status.id, null, "Process " + status + " is missing recovery queue name");
             callback(null, false);

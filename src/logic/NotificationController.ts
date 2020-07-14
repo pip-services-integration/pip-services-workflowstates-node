@@ -42,21 +42,21 @@
 //     }
 
 //     public async Task NotifyFailedWorkflowAsync( status:ProcessStateV1) {
-//         var activity = ActivityManager.GetExecutingActivity(status, false) ?? new TasksStateV1();
+//         var task = TasksManager.GetExecutingTasks(status, false) ?? new TasksStateV1();
 
 //         // Send notification
 //         var notification = CreateNotification(status);
 //         notification.Type = "WorkflowFailed";
 //         notification.Title = "Failed " + status.Type + " " + status.Id;
-//         notification.Description = activity != null && activity.ErrorMessage != null
-//             ? activity.ErrorMessage : "Please review and take actions";
+//         notification.Description = task != null && task.ErrorMessage != null
+//             ? task.ErrorMessage : "Please review and take actions";
 //         notification.Severity = NotificationSeverity.Important;
 
 //         await this._notifications.CreateAsync(status.id, notification);
 //     }
 
 //     public async Task NotifyWorkflowRequestAsync( status:ProcessStateV1,  request:string) {
-//         var activity = ActivityManager.GetExecutingActivity(status, false) ?? new TasksStateV1();
+//         var task = TasksManager.GetExecutingTasks(status, false) ?? new TasksStateV1();
 
 //         // Send notification
 //         var notification = CreateNotification(status);
