@@ -1,130 +1,271 @@
-// let async = require('async');
+let async = require('async');
 
-// import { ConfigParams } from 'pip-services3-commons-node';
-// import { IConfigurable } from 'pip-services3-commons-node';
-// import { IReferences } from 'pip-services3-commons-node';
-// import { Descriptor } from 'pip-services3-commons-node';
-// import { IReferenceable } from 'pip-services3-commons-node';
-// import { DependencyResolver } from 'pip-services3-commons-node';
-// import { FilterParams } from 'pip-services3-commons-node';
-// import { PagingParams } from 'pip-services3-commons-node';
-// import { DataPage } from 'pip-services3-commons-node';
-// import { ICommandable } from 'pip-services3-commons-node';
-// import { CommandSet } from 'pip-services3-commons-node';
-// import { BadRequestException } from 'pip-services3-commons-node';
+import { IProcessStatesPersistence } from '../persistence/IProcessStatesPersistence';
+import { ProcessStateV1, ProcessNotFoundExceptionV1, ProcessStatusV1, ProcessAlreadyExistExceptionV1 } from '../data/version1';
+import { ApplicationException, BadRequestException, DataPage, FilterParams, PagingParams } from 'pip-services3-commons-node';
+import { ProcessLockManager } from './ProcessLockManager';
+import { ProcessStateManager } from './ProcessStatusManager';
+import { MessageEnvelope } from 'pip-services3-messaging-node';
+import { ActivityManager } from './TasksManager';
 
-// import { ProcessStateV1 } from '../data/version1/ProcessStateV1';
-// import { ProcessStateStateV1 } from '../data/version1/ProcessStateStateV1';
-// import { IProcessStatesPersistence } from '../persistence/IProcessStatesPersistence';
-// import { IProcessStatesController } from './IProcessStatesController';
-// import { ProcessStatesCommandSet } from './ProcessStatesCommandSet';
-// import { UnauthorizedException } from 'pip-services3-commons-node/obj/src/errors/UnauthorizedException';
+export class ProcessStatesController {
+    private _persistence: IProcessStatesPersistence;
 
-// export class ProcessStatesController implements  IConfigurable, IReferenceable, ICommandable, IProcessStatesController {
-//     private static _defaultConfig: ConfigParams = ConfigParams.fromTuples(
-//         'dependencies.persistence', 'pip-services-processstates:persistence:*:*:1.0'
-//     );
+    public ProcessStatusController(persistence: IProcessStatesPersistence) {
+        this._persistence = persistence;
+    }
 
-//     private _dependencyResolver: DependencyResolver = new DependencyResolver(ProcessStatesController._defaultConfig);
-//     private _persistence: IProcessStatesPersistence;
-//     private _commandSet: ProcessStatesCommandSet;
+    private _getProcess(
+        processType: string, processKey: string, initiatorId: string, callback: (err: any, result: ProcessStateV1) => void): void {
+        if (processType == null) {
+            callback(new ApplicationException("Process type cannot be null"), null);
+            return;
+        }
+        if (processKey == null && initiatorId == null) {
+            callback(new ApplicationException("Process key or initiator id must be present"), null);
+            return;
+        }
 
-//     public configure(config: ConfigParams): void {
-//         this._dependencyResolver.configure(config);
-//     }
+        // Use either one to locate the right process
+        if (processKey != null) {
+            this._persistence.getActiveByKey(" ", processType, processKey, (err, item) => {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+                if (item == null) {
+                    callback(new ApplicationException("Process with key " + processKey + " was does not exist"), null); //ProcessNotFoundException
+                    return;
+                }
+                callback(null, item);
+            });
+        } else {
+            this._persistence.getActiveById(processType, initiatorId, (err, item) => {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+                if (item == null) {
+                    callback(new ApplicationException("Process with key " + processKey + " was does not exist"), null); //ProcessNotFoundException
+                    return;
+                }
+                callback(null, item);
+            });
+        }
+    }
 
-//     public setReferences(references: IReferences): void {
-//         this._dependencyResolver.setReferences(references);
-//         this._persistence = this._dependencyResolver.getOneRequired<IProcessStatesPersistence>('persistence');
-//     }
+    private _getProcessById(processId: string, callback: (err: any, item: ProcessStateV1) => void): void {
+        if (processId == null) {
+            callback(new BadRequestException("Process id cannot be null"), null);
+            return;
+        }
 
-//     public getCommandSet(): CommandSet {
-//         if (this._commandSet == null)
-//             this._commandSet = new ProcessStatesCommandSet(this);
-//         return this._commandSet;
-//     }
-    
-//     public getStates(correlationId: string, filter: FilterParams, paging: PagingParams, 
-//         callback: (err: any, page: DataPage<ProcessStateV1>) => void): void {
-//         this._persistence.getPageByFilter(correlationId, filter, paging, callback);
-//     }
+        this._persistence.getActiveById("", processId, (err, process) => {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            if (process == null) {
+                callback(new ProcessNotFoundExceptionV1("Process with id " + processId + " was does not exist"), null);
+                return;
+            }
+            callback(null, process);
+        });
 
-//     public getStateById(correlationId: string, id: string, customerId: string,
-//         callback: (err: any, state: ProcessStateV1) => void): void {
-//         this._persistence.getOneById(correlationId, id, (err, state) => {
-//             // Do not allow to access state of different customer
-//             if (state && state.customer_id != customerId)
-//                 state = null;
-            
-//             callback(err, state);
-//         });
-//     }
+    }
 
-//     public createState(correlationId: string, state: ProcessStateV1, 
-//         callback: (err: any, process_state: ProcessStateV1) => void): void {
+    private _getProcessByState(status: ProcessStateV1, callback: (err: any, item: ProcessStateV1) => void): void {
+        if (status == null) {
+            callback(new BadRequestException("Process status cannot be null"), null);
+            return;
+        }
+        this._getProcessById(status.id, callback);
+    }
 
-//         state.state = state.state || ProcessStateStateV1.Ok;
-//         state.create_time = new Date();
-//         state.update_time = new Date();
+    private _getActiveProcess(state: ProcessStateV1, callback: (err: any, item: ProcessStateV1) => void): void {
+        this._getProcessByState(state, (err, process) => {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            var checkRes = ProcessLockManager.checkLocked(state);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            // Relax rules for now - uncomment later
+            //ProcessLockHandler.CheckLockValid(status);
+            checkRes = ProcessStateManager.checkActive(process);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            checkRes = ProcessLockManager.checkLocked(process);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            checkRes = ProcessLockManager.checkLockMatches(state, process);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            callback(null, process);
+        });
+    }
 
-//         this._persistence.create(correlationId, state, callback);
-//     }
+    public getProcesses(correlationId: string, filter: FilterParams, paging: PagingParams, callback: (err: any, page: DataPage<ProcessStateV1>) => void): void {
+        this._persistence.getPageByFilter(correlationId, filter, paging, callback);
+    }
 
-//     public updateState(correlationId: string, state: ProcessStateV1, 
-//         callback: (err: any, process_state: ProcessStateV1) => void): void {
+    public getProcessById(correlationId: string, processId: string, callback: (err: any, item: ProcessStateV1) => void): void {
+        if (processId == null) {
+            callback(new BadRequestException("Process id cannot be null"), null);
+            return;
+        }
+        this._persistence.getOneById(correlationId, processId, callback);
+    }
 
-//         let newState: ProcessStateV1;
+    public startProcess(correlationId: string, processType: string, processKey: string,
+        activityType: string, queueName: string, message: MessageEnvelope, timeToLive: number = 0, callback: (err: any, item: ProcessStateV1) => void): void {
+        //var process = processKey != null ? await GetProcessAsync(processType, processKey, false) : null;
+        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
 
-//         state.state = state.state || ProcessStateStateV1.Ok;
-//         state.update_time = new Date();
-    
-//         async.series([
-//             (callback) => {
-//                 this._persistence.getOneById(correlationId, state.id, (err, data) => {
-//                     if (err == null && data && data.customer_id != state.customer_id) {
-//                         err = new BadRequestException(correlationId, 'WRONG_CUST_ID', 'Wrong process state customer id')
-//                             .withDetails('id', state.id)
-//                             .withDetails('customer_id', state.customer_id);
-//                     }
-//                     callback(err);
-//                 });
-//             },
-//             (callback) => {
-//                 this._persistence.update(correlationId, state, (err, data) => {
-//                     newState = data;
-//                     callback(err);
-//                 });
-//             }
-//         ], (err) => {
-//             callback(err, newState);
-//         });
-//     }
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            if (process == null) {
+                // Starting a new process
+                ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, process) => {
+                    ProcessLockManager.lockProcess(process, activityType);
+                    ActivityManager.startActivity(process, activityType, queueName, message);
+                    // Assign initiator id for processs created without key
+                    process.request_id = processKey == null ? message.correlation_id : null;
+                    this._persistence.create(correlationId, process, callback);
+                    return;
+                });
+            }
+            else {
+                var checkRes = ProcessLockManager.checkNotLocked(process);
+                if (checkRes) {
+                    callback(checkRes, null);
+                    return;
+                }
+                // If it's active throw exception
+                if (process.status != ProcessStatusV1.Starting)
+                    throw new ProcessAlreadyExistExceptionV1("Process with key " + processKey + " already exist");
+                ProcessLockManager.lockProcess(process, activityType);
+                ActivityManager.failActivities(process, "Lock timeout expired");
+                ActivityManager.startActivity(process, activityType, queueName, message, (err) => {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
+                    this._persistence.update(correlationId, process, callback);
+                    return;
+                });
+            }
+        });
+    }
 
-//     public deleteStateById(correlationId: string, id: string, customerId: string,
-//         callback: (err: any, state: ProcessStateV1) => void): void {  
+    public activateOrStartProcess(correlationId: string, processType: string, processKey: string,
+        activityType: string, queueName: string, message: MessageEnvelope, timeToLive: number = 0, callback: (err: any, item: ProcessStateV1) => void): void {
+        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
 
-//         let oldState: ProcessStateV1;
+            if (process == null) {
+                // Starting a new process
+                ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, item) => {
+                    process = item;
+                    ActivityManager.startActivity(process, activityType, queueName, message, (err) => {
+                        if (err) {
+                            callback(err, null);
+                            return;
+                        }
+                        ProcessLockManager.lockProcess(process, activityType);
+                        // Assign initiator id for processs created without key
+                        process.request_id = processKey == null ? message.correlation_id : null;
+                        this._persistence.create(correlationId, process, callback);
+                    });
+                });
+            } else {
+                var checkRes = ProcessLockManager.checkNotLocked(process);
+                if (checkRes) {
+                    callback(checkRes, null);
+                    return;
+                }
+                checkRes = ProcessStateManager.checkActive(process);
+                if (checkRes) {
+                    callback(checkRes, null);
+                    return;
+                }
+                //ProcessStateHandler.CheckNotExpired(process);
 
-//         async.series([
-//             (callback) => {
-//                 this._persistence.getOneById(correlationId, id, (err, data) => {
-//                     if (err == null && data && data.customer_id != customerId) {
-//                         err = new BadRequestException(correlationId, 'WRONG_CUST_ID', 'Wrong process state customer id')
-//                             .withDetails('id', id)
-//                             .withDetails('customer_id', customerId);
-//                     }
-//                     callback(err);
-//                 });
-//             },
-//             (callback) => {
-//                 this._persistence.deleteById(correlationId, id, (err, data) => {
-//                     oldState = data;
-//                     callback(err);
-//                 });
-//             }
-//         ], (err) => {
-//             if (callback) callback(err, oldState);
-//         });
-//     }
+                ProcessLockManager.lockProcess(process, activityType);
+                ActivityManager.failActivities(process, "Lock timeout expired");
+                ActivityManager.startActivity(process, activityType, queueName, message, (err) => {
+                    this._persistence.update(correlationId, process, callback);
+                });
+            }
+            return process;
+        });
+    }
 
-// }
+    public activateProcess(correlationId: string, processId: string, activityType: string,
+        queueName: string, message: MessageEnvelope, callback: (err: any, state: ProcessStateV1) => void): void {
+        this._getProcessById(processId, (err, process) => {
+            var checkRes = ProcessLockManager.checkNotLocked(process);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            var checkRes = ProcessStateManager.checkActive(process);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            //ProcessStateHandler.CheckNotExpired(process);
+            ProcessLockManager.lockProcess(process, activityType);
+            ActivityManager.failActivities(process, "Lock timeout expired");
+            ActivityManager.startActivity(process, activityType, queueName, message, (err) => {
+                this._persistence.update(correlationId, process, callback);
+            });
+        });
+    }
+
+    public activateProcessByKey(correlationId: string, processType: string, processKey: string,
+        activityType: string, queueName: string, message: MessageEnvelope, callback: (err: any, state: ProcessStateV1) => void): void {
+        this._getProcess(processType, processKey, null, (err, process) => {
+            var checkRes = ProcessLockManager.checkNotLocked(process);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            checkRes = ProcessStateManager.checkActive(process);
+            if (checkRes) {
+                callback(checkRes, null);
+                return;
+            }
+            //ProcessStateHandler.CheckNotExpired(process);
+
+            ProcessLockManager.lockProcess(process, activityType);
+            ActivityManager.failActivities(process, "Lock timeout expired");
+            ActivityManager.startActivity(process, activityType, queueName, message);
+
+            this._persistence.update(correlationId, process, callback);
+            return process;
+        });
+    }
+
+   
+
+
+
+
+
+
+
+    public truncate(correlationId: string, timeout: number, callback: (err: any) => void): void {
+        this._persistence.truncate(correlationId, timeout, callback);
+    }
+}

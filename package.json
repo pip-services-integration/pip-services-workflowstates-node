@@ -43,7 +43,8 @@
         "pip-services3-data-node": "^3.0.0",
         "pip-services3-aws-node": "^3.0.0",
         "pip-services3-rpc-node": "^3.0.0",
-        "pip-services3-mongodb-node": "^3.0.0"
+        "pip-services3-mongodb-node": "^3.0.0",
+        "pip-services3-messaging-node": "^3.0.0"
     },
     "devDependencies": {
         "@types/node": "*",

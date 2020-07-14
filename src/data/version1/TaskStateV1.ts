@@ -1,18 +1,18 @@
 import { MessageV1 } from './MessageV1';
 
 export class TaskStateV1 {
-    /// <summary>The type of process task: Download, Upload, Close, Recover, Transfer.</summary>
+    /// The type of process task: Download, Upload, Close, Recover, Transfer.
     public type: string;
-    /// <summary>The task execution state.</summary>
+    /// The task execution state.
     public status?: string;
-    /// <summary>The time when task was started (UTC).</summary>
-    public state_time?: Date;
-    /// <summary>The time when task was completed or failed (UTC).</summary>
+    /// The time when task was started (UTC).
+    public start_time?: Date;
+    /// The time when task was completed or failed (UTC).
     public end_time?: Date;
-    /// <summary>The local name of message queue that activated the task.</summary>
+    /// The local name of message queue that activated the task.
     public queue_name?: string;
-    /// <summary>The message that activated the task.</summary>
+    /// The message that activated the task.
     public message?: MessageV1;
-    /// <summary>The description of error that caused task to fail.</summary>
+    /// The description of error that caused task to fail.
     public error_message?: string;
 }

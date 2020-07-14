@@ -119,9 +119,9 @@ export class CompositeProcessStatesPersistence
         this._activePersistence.getActiveByKey(correlationId, processType, processKey, callback);     
     }
 
-    public getActiveByInitiatorId(correlationId: string, initiatorId: string, 
+    public getActiveByrequestId(correlationId: string, requestId: string, 
         callback: (err: any, item: ProcessStateV1) => void): void {
-        this._activePersistence.getActiveByInitiatorId(correlationId, initiatorId, callback);     
+        this._activePersistence.getActiveByrequestId(correlationId, requestId, callback);     
     }
             
     public create(correlationId: string, item: ProcessStateV1, 

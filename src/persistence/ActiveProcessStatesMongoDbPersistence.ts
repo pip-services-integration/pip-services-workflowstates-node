@@ -4,6 +4,6 @@ export class ActiveProcessStatesMongoDbPersistence extends ProcessStatesMongoDbP
     public constructor() {
         super('active_processes');
         super.ensureIndex({ type: 1, key: 1 });
-        super.ensureIndex({ initiator_id: 1 });
+        super.ensureIndex({ request_id: 1 });
     }
 }
