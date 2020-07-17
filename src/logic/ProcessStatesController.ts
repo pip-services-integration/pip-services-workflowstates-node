@@ -3,7 +3,7 @@ let _ = require('lodash');
 
 import { IProcessStatesPersistence } from '../persistence/IProcessStatesPersistence';
 import { ProcessStateV1, ProcessNotFoundExceptionV1, ProcessStatusV1, ProcessAlreadyExistExceptionV1, MessageV1 } from '../data/version1';
-import { ApplicationException, BadRequestException, DataPage, FilterParams, PagingParams, IReferences, IClosable, IOpenable, IConfigurable, ConfigParams, IReconfigurable, Descriptor } from 'pip-services3-commons-node';
+import { ApplicationException, BadRequestException, DataPage, FilterParams, PagingParams, IReferences, IClosable, IOpenable, IConfigurable, ConfigParams, IReconfigurable, Descriptor, ICommandable, CommandSet } from 'pip-services3-commons-node';
 import { ProcessLockManager } from './ProcessLockManager';
 import { ProcessStateManager } from './ProcessStatusManager';
 import { TasksManager } from './TasksManager';
@@ -11,6 +11,7 @@ import { RecoveryManager } from './RecoveryManager';
 import { IProcessStatesController } from './IProcessStatesController';
 import { CompositeLogger, CompositeCounters } from 'pip-services3-components-node';
 import { RecoveryController } from './RecoveryController';
+import { ProcessStateCommandSet } from './ProcessStateCommandSet';
 
 
 /*
@@ -21,7 +22,7 @@ import { RecoveryController } from './RecoveryController';
 */
 
 
-export class ProcessStatesController implements IProcessStatesController, IOpenable, IConfigurable, IReconfigurable {
+export class ProcessStatesController implements IProcessStatesController, IOpenable, IConfigurable, IReconfigurable, ICommandable {
 
     private _persistence: IProcessStatesPersistence;
 
@@ -31,6 +32,8 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
     private _logger: CompositeLogger = new CompositeLogger();
     private _counters: CompositeCounters = new CompositeCounters();
     protected _opened: boolean = false;
+
+    private _commandset: CommandSet;
 
     private _truncate_timer: any;
     private _recovery_timer: any;
@@ -42,6 +45,10 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
     private readonly _batchSize: number = 100;
 
     public constructor() {
+    }
+    getCommandSet(): CommandSet {
+        this._commandset = this._commandset || new ProcessStateCommandSet(this);
+        return this._commandset;
     }
 
     public configure(config: ConfigParams): void {
