@@ -17,7 +17,7 @@ export class ProcessStatesMongoDbPersistence
         super(name || 'processes');
         super.ensureIndex({ start_time: -1 });
     }
-    
+
     private toStringArray(value: string): string[] {
         if (value == null) return null;
         let items = value.split(',');
@@ -75,18 +75,18 @@ export class ProcessStatesMongoDbPersistence
             searchCriteria.push({ status: { $regex: searchRegex } });
             criteria.push({ $or: searchCriteria });
         }
-                
+
         return criteria.length > 0 ? { $and: criteria } : null;
     }
-    
+
     public getPageByFilter(correlationId: string, filter: FilterParams, paging: PagingParams,
         callback: (err: any, page: DataPage<ProcessStateV1>) => void): void {
         super.getPageByFilter(correlationId, this.composeFilter(filter), paging, '-start_time', null, callback);
     }
 
-    public getActiveById(correlationId: string, id: string, 
+    public getActiveById(correlationId: string, id: string,
         callback: (err: any, item: ProcessStateV1) => void): void {
-        let filter = { 
+        let filter = {
             $and: [
                 { _id: id },
                 { status: { $ne: ProcessStatusV1.Aborted } },
@@ -102,12 +102,12 @@ export class ProcessStatesMongoDbPersistence
 
             item = this.convertToPublic(item);
             callback(err, item);
-        });    
+        });
     }
 
-    public getActiveByKey(correlationId: string, processType: string, processKey: string, 
+    public getActiveByKey(correlationId: string, processType: string, processKey: string,
         callback: (err: any, item: ProcessStateV1) => void): void {
-        let filter = { 
+        let filter = {
             $and: [
                 { type: processType },
                 { key: processKey },
@@ -124,12 +124,12 @@ export class ProcessStatesMongoDbPersistence
 
             item = this.convertToPublic(item);
             callback(err, item);
-        });    
+        });
     }
 
-    public getActiveByrequestId(correlationId: string, requestId: string, 
+    public getActiveByRequestId(correlationId: string, requestId: string,
         callback: (err: any, item: ProcessStateV1) => void): void {
-        let filter = { 
+        let filter = {
             $and: [
                 { request_id: requestId },
                 { status: { $ne: ProcessStatusV1.Aborted } },
@@ -145,17 +145,17 @@ export class ProcessStatesMongoDbPersistence
 
             item = this.convertToPublic(item);
             callback(err, item);
-        });    
+        });
     }
-            
+
     public truncate(correlationId: string, timeout: number,
         callback: (err: any) => void): void {
-            let filter = { 
-                $or: [
-                    { status: ProcessStatusV1.Aborted },
-                    { status: ProcessStatusV1.Completed }
-                ]
-            };
-            super.deleteByFilter(correlationId, filter, callback);
-    }    
+        let filter = {
+            $or: [
+                { status: ProcessStatusV1.Aborted },
+                { status: ProcessStatusV1.Completed }
+            ]
+        };
+        super.deleteByFilter(correlationId, filter, callback);
+    }
 }

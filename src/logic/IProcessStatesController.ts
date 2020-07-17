@@ -52,7 +52,7 @@ export interface IProcessStatesController {
         callback: (err: any) => void): void;
     
     suspendProcess(correlationId: string, state: ProcessStateV1, request: string,
-        recoveryQueue: string, recoveryMessage: MessageV1,
+        recoveryQueue: string, recoveryMessage: MessageV1, recoveryTimeout:number,
         callback: (err: any) => void): void;
     
     failProcess(correlationId: string, state: ProcessStateV1, errorMessage: string,

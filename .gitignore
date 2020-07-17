@@ -6,3 +6,4 @@
 /obj/test
 /docker/id_rsa*
 cross-table.txt
+*.cs

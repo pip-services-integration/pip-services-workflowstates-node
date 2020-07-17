@@ -51,7 +51,7 @@ export class ProcessStatesMemoryPersistence
         let status = filter.getAsNullableString('status');
         let statuses = this.toStringArray(filter.getAsNullableString('statuses'));
         let key = filter.getAsNullableString('key');
-        let recoverd = filter.getAsNullableBoolean('recoverd');
+        let recoverd = filter.getAsNullableBoolean('recovered');
         let expired = filter.getAsNullableBoolean('expired');
         let fromTime = filter.getAsNullableDateTime('from_time');
         let toTime = filter.getAsNullableDateTime('to_time');
@@ -123,7 +123,7 @@ export class ProcessStatesMemoryPersistence
     
     }
 
-    public getActiveByrequestId(correlationId: string, requestId: string, 
+    public getActiveByRequestId(correlationId: string, requestId: string, 
         callback: (err: any, item: ProcessStateV1) => void): void {
         let items = this._items.filter((x) => {
             return x.request_id == requestId

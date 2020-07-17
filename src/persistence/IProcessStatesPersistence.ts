@@ -20,7 +20,7 @@ export interface IProcessStatesPersistence {
     getActiveByKey(correlationId: string, processType: string, processKey: string, 
         callback: (err: any, item: ProcessStateV1) => void): void;
 
-    getActiveByrequestId(correlationId: string, requestId: string, 
+    getActiveByRequestId(correlationId: string, requestId: string, 
         callback: (err: any, item: ProcessStateV1) => void): void;
             
     create(correlationId: string, item: ProcessStateV1, 
