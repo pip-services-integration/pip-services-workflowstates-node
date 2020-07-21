@@ -37,7 +37,7 @@ export class TasksManager {
             if (callback)
                 callback(new ApplicationException("Tasks type cannot be null"));
 
-        process.tasks = process.tasks ?? new Array<TaskStateV1>();
+        process.tasks = process.tasks || new Array<TaskStateV1>();
 
         // Create a new one if it was not found
         var task = new TaskStateV1();
@@ -52,14 +52,14 @@ export class TasksManager {
     }
 
     public static failTasks(process: ProcessStateV1, errorMessage: string) {
-        process.tasks = process.tasks ?? new Array<TaskStateV1>();
+        process.tasks = process.tasks || new Array<TaskStateV1>();
 
         // Mark previously running but uncompleted activities as failed
         for (var task of process.tasks) {
             if (task.status == TaskStatusV1.Executing) {
                 task.status = TaskStatusV1.Failed;
                 task.end_time = new Date();
-                task.error_message = errorMessage ?? "Unexpected error";
+                task.error_message = errorMessage || "Unexpected error";
             }
         }
     }
@@ -74,7 +74,7 @@ export class TasksManager {
         return null;
     }
     public static rollbackTasks(process: ProcessStateV1) {
-        process.tasks = process.tasks ?? new Array<TaskStateV1>();
+        process.tasks = process.tasks || new Array<TaskStateV1>();
 
         process.tasks = _.filter(process.tasks,
             a => a.State != TaskStatusV1.Executing
@@ -82,7 +82,7 @@ export class TasksManager {
     }
 
     public static completeTasks(process: ProcessStateV1) {
-        process.tasks = process.tasks ?? new Array<TaskStateV1>();
+        process.tasks = process.tasks || new Array<TaskStateV1>();
 
         // Mark previously running but uncompleted activities as failed
         for (var task of process.tasks) {

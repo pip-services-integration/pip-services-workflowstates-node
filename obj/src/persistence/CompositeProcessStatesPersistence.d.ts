@@ -1,0 +1,34 @@
+import { FilterParams, IReferences } from 'pip-services3-commons-node';
+import { PagingParams } from 'pip-services3-commons-node';
+import { ConfigParams } from 'pip-services3-commons-node';
+import { DataPage } from 'pip-services3-commons-node';
+import { IConfigurable } from 'pip-services3-commons-node';
+import { IReferenceable } from 'pip-services3-commons-node';
+import { ICleanable } from 'pip-services3-commons-node';
+import { ProcessStateV1 } from '../data/version1/ProcessStateV1';
+import { IProcessStatesPersistence } from './IProcessStatesPersistence';
+export declare class CompositeProcessStatesPersistence implements IProcessStatesPersistence, IConfigurable, IReferenceable, ICleanable {
+    protected _activePersistence: IProcessStatesPersistence;
+    protected _allPersistence: IProcessStatesPersistence;
+    protected _opened: boolean;
+    protected constructor(activePersistence: IProcessStatesPersistence, allPersistence: IProcessStatesPersistence);
+    isOpen(): boolean;
+    open(correlationId: string, callback?: (err: any) => void): void;
+    close(correlationId: string, callback?: (err: any) => void): void;
+    configure(config: ConfigParams): void;
+    setReferences(references: IReferences): void;
+    clear(correlationId: any, callback: (err: any) => void): void;
+    private toStringArray;
+    isActiveQuery(filter: FilterParams): boolean;
+    getPageByFilter(correlationId: string, filter: FilterParams, paging: PagingParams, callback: (err: any, page: DataPage<ProcessStateV1>) => void): void;
+    getOneById(correlationId: string, id: string, callback: (err: any, item: ProcessStateV1) => void): void;
+    getListByIds(correlationId: string, ids: string[], callback: (err: any, items: ProcessStateV1[]) => void): void;
+    getActiveById(correlationId: string, id: string, callback: (err: any, item: ProcessStateV1) => void): void;
+    getActiveByKey(correlationId: string, processType: string, processKey: string, callback: (err: any, item: ProcessStateV1) => void): void;
+    getActiveByRequestId(correlationId: string, requestId: string, callback: (err: any, item: ProcessStateV1) => void): void;
+    create(correlationId: string, item: ProcessStateV1, callback: (err: any, item: ProcessStateV1) => void): void;
+    update(correlationId: string, item: ProcessStateV1, callback: (err: any, item: ProcessStateV1) => void): void;
+    deleteById(correlationId: string, id: string, callback: (err: any, item: ProcessStateV1) => void): void;
+    deleteByIds(correlationId: string, ids: string[], callback: (err: any) => void): void;
+    truncate(correlationId: string, timeout: number, callback: (err: any) => void): void;
+}

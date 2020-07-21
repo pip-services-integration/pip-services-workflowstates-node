@@ -51,7 +51,7 @@ export class ProcessStatesMemoryPersistence
         let status = filter.getAsNullableString('status');
         let statuses = this.toStringArray(filter.getAsNullableString('statuses'));
         let key = filter.getAsNullableString('key');
-        let recoverd = filter.getAsNullableBoolean('recovered');
+        let recovered = filter.getAsNullableBoolean('recovered');
         let expired = filter.getAsNullableBoolean('expired');
         let fromTime = filter.getAsNullableDateTime('from_time');
         let toTime = filter.getAsNullableDateTime('to_time');
@@ -70,7 +70,7 @@ export class ProcessStatesMemoryPersistence
                 return false;
             if (key && item.key != key) 
                 return false;
-            if (recoverd == true && (item.recovery_time == null || item.recovery_time.getTime() >= now)) 
+            if (recovered == true && (item.recovery_time == null || item.recovery_time.getTime() >= now)) 
                 return false;
             if (expired == true && (item.expiration_time == null || item.expiration_time.getTime() >= now)) 
                 return false;

@@ -17,11 +17,49 @@ export class CompositeProcessStatesPersistence
     implements IProcessStatesPersistence, IConfigurable, IReferenceable, ICleanable {
     protected _activePersistence: IProcessStatesPersistence;
     protected _allPersistence: IProcessStatesPersistence;
+    protected _opened:boolean = false;
 
     protected constructor(activePersistence: IProcessStatesPersistence,
         allPersistence: IProcessStatesPersistence) {
         this._activePersistence = activePersistence;
         this._allPersistence = allPersistence;
+    }
+
+    isOpen(): boolean {
+        return this._opened;
+    }
+
+    open(correlationId: string, callback?: (err: any) => void): void {
+        this._activePersistence.open(correlationId, (err)=>{
+            if (err) {
+                callback(err);
+                return;
+            }
+            this._allPersistence.open(correlationId, (err)=>{
+                if (err) {
+                    callback(err);
+                    this._activePersistence.close(correlationId);
+                    return;
+                }
+                this._opened = true;
+                callback(null);
+            });
+
+        });
+    }
+    
+    close(correlationId: string, callback?: (err: any) => void): void {
+        this._activePersistence.close(correlationId, (err)=>{
+            if (err) {
+                callback(err);
+                this._allPersistence.close(correlationId);
+                return;
+            }
+            this._allPersistence.close(correlationId, (err)=>{
+                this._opened = false;
+                callback(err);
+            });
+        })  
     }
 
     public configure(config: ConfigParams): void {
@@ -54,7 +92,7 @@ export class CompositeProcessStatesPersistence
                 this._activePersistence['clear'](correlationId, callback);
             },
             (callback) => {
-                this._activePersistence['clear'](correlationId, callback);
+                this._allPersistence['clear'](correlationId, callback);
             }
         ], (err) => {
             if (callback) callback(err);
@@ -119,9 +157,9 @@ export class CompositeProcessStatesPersistence
         this._activePersistence.getActiveByKey(correlationId, processType, processKey, callback);     
     }
 
-    public getActiveByrequestId(correlationId: string, requestId: string, 
+    public getActiveByRequestId(correlationId: string, requestId: string, 
         callback: (err: any, item: ProcessStateV1) => void): void {
-        this._activePersistence.getActiveByrequestId(correlationId, requestId, callback);     
+        this._activePersistence.getActiveByRequestId(correlationId, requestId, callback);     
     }
             
     public create(correlationId: string, item: ProcessStateV1, 

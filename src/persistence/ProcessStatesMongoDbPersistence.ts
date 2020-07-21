@@ -46,11 +46,11 @@ export class ProcessStatesMongoDbPersistence
             criteria.push({ status: { $in: statuses } });
 
         let key = filter.getAsNullableString('key');
-        if (status != null)
-            criteria.push({ status: status });
+        if (key != null)
+            criteria.push({ key: key });
 
-        let recoverd = filter.getAsNullableBoolean('recoverd');
-        if (recoverd == true)
+        let recovered = filter.getAsNullableBoolean('recovered');
+        if (recovered == true)
             criteria.push({ recovery_time: { $lt: new Date() } });
 
         let expired = filter.getAsNullableBoolean('expired');

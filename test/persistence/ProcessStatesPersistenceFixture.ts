@@ -1,305 +1,471 @@
-// let _ = require('lodash');
-// let async = require('async');
-// let assert = require('chai').assert;
+let _ = require('lodash');
+let async = require('async');
+let assert = require('chai').assert;
 
-// import { FilterParams } from 'pip-services3-commons-node';
-// import { PagingParams } from 'pip-services3-commons-node';
+import { FilterParams } from 'pip-services3-commons-node';
+import { PagingParams } from 'pip-services3-commons-node';
+import { ProcessStateV1 } from '../../src/data/version1/ProcessStateV1';
 
-// import { ProcessStateV1 } from '../../src/data/version1/ProcessStateV1';
-// import { ProcessStateTypeV1 } from '../../src/data/version1/ProcessStateTypeV1';
-// import { ProcessStateStateV1 } from '../../src/data/version1/ProcessStateStateV1';
+import { IProcessStatesPersistence } from '../../src/persistence/IProcessStatesPersistence';
+import { TaskStateV1, ProcessStatusV1 } from '../../src/data/version1';
 
-// import { IProcessStatesPersistence } from '../../src/persistence/IProcessStatesPersistence';
-// import { AddressV1 } from '../../src/data/version1/ShippingDetailsV1';
 
-// let STATE1: ProcessStateV1 = {
-//     id: '1',
-//     customer_id: '1',
-//     type: ProcessStateTypeV1.Visa,
-//     number: '4032036094894795',
-//     expire_month: 1,
-//     expire_year: 2021,
-//     first_name: 'Bill',
-//     last_name: 'Gates',
-//     billing_address: {
-//         line1: '2345 Swan Rd',
-//         city: 'Tucson',
-//         state: 'AZ',
-//         postal_code: '85710',
-//         country_code: 'US'
-//     },
-//     ccv: '213',
-//     name: 'Test State 1',
-//     saved: true,
-//     default: true,
-//     state: ProcessStateStateV1.Ok
-// };
-// let STATE2: ProcessStateV1 = {
-//     id: '2',
-//     customer_id: '1',
-//     type: ProcessStateTypeV1.Visa,
-//     number: '4032037578262780',
-//     expire_month: 4,
-//     expire_year: 2028,
-//     first_name: 'Joe',
-//     last_name: 'Dow',
-//     billing_address: {
-//         line1: '123 Broadway Blvd',
-//         city: 'New York',
-//         state: 'NY',
-//         postal_code: '123001',
-//         country_code: 'US'
-//     },
-//     name: 'Test State 2',
-//     saved: true,
-//     default: false,
-//     state: ProcessStateStateV1.Expired
-// };
-// let STATE3: ProcessStateV1 = {
-//     id: '3',
-//     customer_id: '2',
-//     type: ProcessStateTypeV1.Visa,
-//     number: '4032037578262780',
-//     expire_month: 5,
-//     expire_year: 2022,
-//     first_name: 'Steve',
-//     last_name: 'Jobs',
-//     billing_address: {
-//         line1: '234 6th Str',
-//         city: 'Los Angeles',
-//         state: 'CA',
-//         postal_code: '65320',
-//         country_code: 'US'
-//     },
-//     ccv: '124',
-//     name: 'Test State 2',
-//     state: ProcessStateStateV1.Ok
-// };
+let STATE1: ProcessStateV1 = {
+    id: "id_1",
+    type: "Copy orders",
+    request_id: "req_123",
+    key: "Orders.Sync",
+    status: ProcessStatusV1.Running,
+    start_time: new Date(),
+    // end_time: null,
+    last_action_time: new Date(Date.now() + 600),
+    expiration_time: new Date(Date.now() + 3600),
+    request: "",
+    comment: "State 1",
+    recovery_time: null,
+    recovery_queue_name: "recover_queue",
+    recovery_message: null,
+    recovery_timeout: 3600,
+    recovery_attempts: 0,
+    lock_token: "",
+    locked_until_time: null,
+    tasks: Array<TaskStateV1>(),
+    data: null
+};
 
-// export class ProcessStatesPersistenceFixture {
-//     private _persistence: IProcessStatesPersistence;
-    
-//     constructor(persistence) {
-//         assert.isNotNull(persistence);
-//         this._persistence = persistence;
-//     }
+let STATE2: ProcessStateV1 = {
+    id: "id_2",
+    type: "Copy orders",
+    request_id: "req_231",
+    key: "Orders.Sync",
+    status: ProcessStatusV1.Running,
+    start_time: new Date(),
+    // end_time: null,
+    last_action_time: new Date(Date.now() + 1600),
+    expiration_time: new Date(Date.now() + 2 * 3600),
+    request: "",
+    comment: "State 2",
+    recovery_time: null,
+    recovery_queue_name: "recover_queue",
+    recovery_message: null,
+    recovery_timeout: 3600,
+    recovery_attempts: 0,
+    lock_token: "",
+    locked_until_time: null,
+    tasks: Array<TaskStateV1>(),
+    data: null
+};
 
-//     private testCreateProcessStates(done) {
-//         async.series([
-//         // Create one process state
-//             (callback) => {
-//                 this._persistence.create(
-//                     null,
-//                     STATE1,
-//                     (err, processState) => {
-//                         assert.isNull(err);
+let STATE3: ProcessStateV1 = {
+    id: "id_3",
+    type: "Copy invoces",
+    request_id: "req_321",
+    key: "Copy.Invoces",
+    status: ProcessStatusV1.Suspended,
+    start_time: new Date(),
+    // end_time: null,
+    last_action_time: new Date(Date.now() + 2600),
+    expiration_time: new Date(Date.now() + 3 * 3600),
+    request: "",
+    comment: "State 3",
+    recovery_time: new Date(),
+    recovery_queue_name: "recover_queue",
+    recovery_message: null,
+    recovery_timeout: 3600,
+    recovery_attempts: 0,
+    lock_token: "",
+    locked_until_time: null,
+    tasks: Array<TaskStateV1>(),
+    data: null
+};
 
-//                         assert.isObject(processState);
-//                         assert.equal(processState.first_name, STATE1.first_name);
-//                         assert.equal(processState.last_name, STATE1.last_name);
-//                         assert.equal(processState.expire_year, STATE1.expire_year);
-//                         assert.equal(processState.customer_id, STATE1.customer_id);
+let STATE4: ProcessStateV1 = {
+    id: "id_4",
+    type: "Copy invoces",
+    request_id: "req_321",
+    key: "Copy.Invoces",
+    status: ProcessStatusV1.Completed,
+    start_time: new Date(),
+    end_time: new Date(Date.now() + 3600),
+    last_action_time: null,
+    expiration_time: new Date(Date.now() + 3 * 3600),
+    request: "",
+    comment: "State 3",
+    recovery_time: null,
+    recovery_queue_name: "recover_queue",
+    recovery_message: null,
+    recovery_timeout: 3600,
+    recovery_attempts: 0,
+    lock_token: "",
+    locked_until_time: null,
+    tasks: Array<TaskStateV1>(),
+    data: null
+};
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Create another process state
-//             (callback) => {
-//                 this._persistence.create(
-//                     null,
-//                     STATE2,
-//                     (err, processState) => {
-//                         assert.isNull(err);
+export class ProcessStatesPersistenceFixture {
+    private _persistence: IProcessStatesPersistence;
 
-//                         assert.isObject(processState);
-//                         assert.equal(processState.first_name, STATE2.first_name);
-//                         assert.equal(processState.last_name, STATE2.last_name);
-//                         assert.equal(processState.expire_year, STATE2.expire_year);
-//                         assert.equal(processState.customer_id, STATE2.customer_id);
+    constructor(persistence) {
+        assert.isNotNull(persistence);
+        this._persistence = persistence;
+    }
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Create yet another process state
-//             (callback) => {
-//                 this._persistence.create(
-//                     null,
-//                     STATE3,
-//                     (err, processState) => {
-//                         assert.isNull(err);
+    private testCreateProcessStates(done) {
+        async.series([
+            // Create one process state
+            (callback) => {
+                this._persistence.create(
+                    null,
+                    STATE1,
+                    (err, processState) => {
+                        assert.isNull(err);
+                        assert.isObject(processState);
+                        assert.equal(processState.id, STATE1.id);
+                        assert.equal(processState.type, STATE1.type);
+                        assert.equal(processState.request_id, STATE1.request_id);
+                        assert.equal(processState.start_time, STATE1.start_time);
+                        assert.equal(processState.last_action_time, STATE1.last_action_time);
+                        assert.equal(processState.expiration_time, STATE1.expiration_time);
+                        assert.equal(processState.request, STATE1.request);
+                        assert.equal(processState.recovery_time, STATE1.recovery_time);
+                        assert.equal(processState.recovery_queue_name, STATE1.recovery_queue_name);
+                        assert.equal(processState.recovery_message, STATE1.recovery_message);
+                        assert.equal(processState.recovery_timeout, STATE1.recovery_timeout);
+                        assert.equal(processState.recovery_attempts, STATE1.recovery_attempts);
+                        assert.equal(processState.lock_token, STATE1.lock_token);
+                        assert.equal(processState.locked_until_time, STATE1.locked_until_time);
+                        assert.equal(processState.tasks, STATE1.tasks);
+                        assert.equal(processState.data, STATE1.data);
+                        callback();
+                    }
+                );
+            },
+            // Create another process state
+            (callback) => {
+                this._persistence.create(
+                    null,
+                    STATE2,
+                    (err, processState) => {
+                        assert.isNull(err);
 
-//                         assert.isObject(processState);
-//                         assert.equal(processState.first_name, STATE3.first_name);
-//                         assert.equal(processState.last_name, STATE3.last_name);
-//                         assert.equal(processState.expire_year, STATE3.expire_year);
-//                         assert.equal(processState.customer_id, STATE3.customer_id);
+                        assert.isNull(err);
+                        assert.isObject(processState);
+                        assert.equal(processState.id, STATE2.id);
+                        assert.equal(processState.type, STATE2.type);
+                        assert.equal(processState.request_id, STATE2.request_id);
+                        assert.equal(processState.start_time, STATE2.start_time);
+                        assert.equal(processState.last_action_time, STATE2.last_action_time);
+                        assert.equal(processState.expiration_time, STATE2.expiration_time);
+                        assert.equal(processState.request, STATE2.request);
+                        assert.equal(processState.recovery_time, STATE2.recovery_time);
+                        assert.equal(processState.recovery_queue_name, STATE2.recovery_queue_name);
+                        assert.equal(processState.recovery_message, STATE2.recovery_message);
+                        assert.equal(processState.recovery_timeout, STATE2.recovery_timeout);
+                        assert.equal(processState.recovery_attempts, STATE2.recovery_attempts);
+                        assert.equal(processState.lock_token, STATE2.lock_token);
+                        assert.equal(processState.locked_until_time, STATE2.locked_until_time);
+                        assert.equal(processState.tasks, STATE2.tasks);
+                        assert.equal(processState.data, STATE2.data);
 
-//                         callback();
-//                     }
-//                 );
-//             }
-//         ], done);
-//     }
-                
-//     testCrudOperations(done) {
-//         let processState1: ProcessStateV1;
+                        callback();
+                    }
+                );
+            },
+            // Create yet another process state
+            (callback) => {
+                this._persistence.create(
+                    null,
+                    STATE3,
+                    (err, processState) => {
+                        assert.isNull(err);
 
-//         async.series([
-//         // Create items
-//             (callback) => {
-//                 this.testCreateProcessStates(callback);
-//             },
-//         // Get all process states
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     new FilterParams(),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+                        assert.isNull(err);
+                        assert.isObject(processState);
+                        assert.equal(processState.id, STATE3.id);
+                        assert.equal(processState.type, STATE3.type);
+                        assert.equal(processState.request_id, STATE3.request_id);
+                        assert.equal(processState.start_time, STATE3.start_time);
+                        assert.equal(processState.last_action_time, STATE3.last_action_time);
+                        assert.equal(processState.expiration_time, STATE3.expiration_time);
+                        assert.equal(processState.request, STATE3.request);
+                        assert.equal(processState.recovery_time, STATE3.recovery_time);
+                        assert.equal(processState.recovery_queue_name, STATE3.recovery_queue_name);
+                        assert.equal(processState.recovery_message, STATE3.recovery_message);
+                        assert.equal(processState.recovery_timeout, STATE3.recovery_timeout);
+                        assert.equal(processState.recovery_attempts, STATE3.recovery_attempts);
+                        assert.equal(processState.lock_token, STATE3.lock_token);
+                        assert.equal(processState.locked_until_time, STATE3.locked_until_time);
+                        assert.equal(processState.tasks, STATE3.tasks);
+                        assert.equal(processState.data, STATE3.data);
 
-//                         assert.isObject(page);
-//                         assert.lengthOf(page.data, 3);
+                        callback();
+                    }
+                );
+            }
+        ], done);
+    }
 
-//                         processState1 = page.data[0];
+    testCrudOperations(done) {
+        let processState1: ProcessStateV1;
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Update the process state
-//             (callback) => {
-//                 processState1.name = 'Updated State 1';
+        async.series([
+            // Create items
+            (callback) => {
+                this.testCreateProcessStates(callback);
+            },
+            // Get all process states
+            (callback) => {
+                this._persistence.getPageByFilter(
+                    null,
+                    new FilterParams(),
+                    new PagingParams(),
+                    (err, page) => {
+                        assert.isNull(err);
 
-//                 this._persistence.update(
-//                     null,
-//                     processState1,
-//                     (err, processState) => {
-//                         assert.isNull(err);
+                        assert.isObject(page);
+                        assert.lengthOf(page.data, 3);
 
-//                         assert.isObject(processState);
-//                         assert.equal(processState.name, 'Updated State 1');
-//                         // PayPal changes id on update
-//                         //!!assert.equal(processState.id, processState1.id);
+                        processState1 = page.data[0];
 
-//                         processState1 = processState;
+                        callback();
+                    }
+                );
+            },
+            // Update the process state
+            (callback) => {
+                processState1.comment = 'Updated State 1';
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Delete process state
-//             (callback) => {
-//                 this._persistence.deleteById(
-//                     null,
-//                     processState1.id,
-//                     (err) => {
-//                         assert.isNull(err);
+                this._persistence.update(
+                    null,
+                    processState1,
+                    (err, processState) => {
+                        assert.isNull(err);
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Try to get delete process state
-//             (callback) => {
-//                 this._persistence.getOneById(
-//                     null,
-//                     processState1.id,
-//                     (err, processState) => {
-//                         assert.isNull(err);
+                        assert.isObject(processState);
+                        assert.equal(processState.comment, 'Updated State 1');
+                        processState1 = processState;
 
-//                         assert.isNull(processState || null);
+                        callback();
+                    }
+                );
+            },
+            // Delete process state
+            (callback) => {
+                this._persistence.deleteById(
+                    null,
+                    processState1.id,
+                    (err) => {
+                        assert.isNull(err);
+                        callback();
+                    }
+                );
+            },
+            // Try to get delete process state
+            (callback) => {
+                this._persistence.getOneById(
+                    null,
+                    processState1.id,
+                    (err, processState) => {
+                        assert.isNull(err);
+                        assert.isNull(processState || null);
+                        callback();
+                    }
+                );
+            }
+        ], done);
+    }
 
-//                         callback();
-//                     }
-//                 );
-//             }
-//         ], done);
-//     }
+    testGetWithFilter(done) {
+        async.series([
+            // Create process states
+            (callback) => {
+                this.testCreateProcessStates(callback);
+            },
+            // Get process states filtered by process key
+            (callback) => {
+                this._persistence.getPageByFilter(
+                    null,
+                    FilterParams.fromValue({
+                        key: 'Orders.Sync'
+                    }),
+                    new PagingParams(),
+                    (err, page) => {
+                        assert.isNull(err);
+                        assert.isObject(page);
+                        assert.lengthOf(page.data, 2);
+                        callback();
+                    }
+                );
+            },
+            // Get process states by status
+            (callback) => {
+                this._persistence.getPageByFilter(
+                    null,
+                    FilterParams.fromValue({
+                        status: ProcessStatusV1.Running
+                    }),
+                    new PagingParams(),
+                    (err, page) => {
+                        assert.isNull(err)
+                        assert.isObject(page);
+                        assert.lengthOf(page.data, 2);
+                        callback();
+                    }
+                );
+            },
+            // Get process states by recovered
+            (callback) => {
+                this._persistence.getPageByFilter(
+                    null,
+                    FilterParams.fromValue({
+                        recovered: true
+                    }),
+                    new PagingParams(),
+                    (err, page) => {
+                        assert.isNull(err);
+                        assert.isObject(page);
+                        assert.lengthOf(page.data, 1);
+                        callback();
+                    }
+                );
+            },
+            // Get process states by statuses
+            (callback) => {
+                this._persistence.getPageByFilter(
+                    null,
+                    FilterParams.fromValue({
+                        statuses: [ProcessStatusV1.Running, ProcessStatusV1.Suspended]
+                    }),
+                    new PagingParams(),
+                    (err, page) => {
+                        assert.isNull(err);
+                        assert.isObject(page);
+                        assert.lengthOf(page.data, 3);
 
-//     testGetWithFilter(done) {
-//         async.series([
-//         // Create process states
-//             (callback) => {
-//                 this.testCreateProcessStates(callback);
-//             },
-//         // Get process states filtered by customer id
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         customer_id: '1'
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+                        callback();
+                    }
+                );
+            },
+        ], done);
+    }
 
-//                         assert.isObject(page);
-//                         assert.lengthOf(page.data, 2);
+    testGetActiveProcess(done) {
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Get process states by state
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         state: 'ok'
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+        async.series([
+            // Create process states
+            (callback) => {
+                this.testCreateProcessStates(callback);
+            },
+            // Get active process states by process id
+            (callback) => {
+                this._persistence.getActiveById(
+                    null, STATE3.id,
+                    (err, item) => {
+                        assert.isNull(err);
+                        assert.isObject(item);
+                        assert.equal(STATE3.id, item.id);
+                        callback();
+                    }
+                );
+            },
+            // Get active process states by key
+            (callback) => {
+                this._persistence.getActiveByKey(
+                    null, STATE1.type, STATE1.key,
+                    (err, item) => {
+                        assert.isNull(err);
+                        assert.isObject(item);
+                        assert.equal(STATE1.id, item.id);
+                        callback();
+                    }
+                );
+            },
+            // Get active process states by requestId
+            (callback) => {
+                this._persistence.getActiveByRequestId(
+                    null, STATE2.request_id,
+                    (err, item) => {
+                        assert.isNull(err);
+                        assert.isObject(item);
+                        assert.equal(STATE2.id, item.id);
+                        callback();
+                    }
+                );
+            }
+        ], done);
+    }
 
-//                         assert.isObject(page);
-//                         // PayPal calculate states by itself
-//                         //assert.lengthOf(page.data, 2);
+    testTruncateProcesses(done) {
+        async.series([
+            // Create process states
+            (callback) => {
+                this.testCreateProcessStates(callback);
+            },
+            // Create process states
+            (callback) => {
+                this._persistence.create(
+                    null,
+                    STATE4,
+                    (err, processState) => {
+                        assert.isNull(err);
+                        assert.isObject(processState);
+                        assert.equal(processState.id, STATE4.id);
+                        assert.equal(processState.type, STATE4.type);
+                        assert.equal(processState.request_id, STATE4.request_id);
+                        assert.equal(processState.start_time, STATE4.start_time);
+                        assert.equal(processState.last_action_time, STATE4.last_action_time);
+                        assert.equal(processState.expiration_time, STATE4.expiration_time);
+                        assert.equal(processState.request, STATE4.request);
+                        assert.equal(processState.recovery_time, STATE4.recovery_time);
+                        assert.equal(processState.recovery_queue_name, STATE4.recovery_queue_name);
+                        assert.equal(processState.recovery_message, STATE4.recovery_message);
+                        assert.equal(processState.recovery_timeout, STATE4.recovery_timeout);
+                        assert.equal(processState.recovery_attempts, STATE4.recovery_attempts);
+                        assert.equal(processState.lock_token, STATE4.lock_token);
+                        assert.equal(processState.locked_until_time, STATE4.locked_until_time);
+                        assert.equal(processState.tasks, STATE4.tasks);
+                        assert.equal(processState.data, STATE4.data);
+                        callback();
+                    }
+                );
+            },
+            // Get all process states
+            (callback) => {
+                this._persistence.getPageByFilter(
+                    null,
+                    new FilterParams(),
+                    new PagingParams(),
+                    (err, page) => {
+                        assert.isNull(err);
+                        assert.isObject(page);
+                        assert.lengthOf(page.data, 4);
+                        callback();
+                    }
+                );
+            },
+            (callback) => {
+                this._persistence.truncate(null, 0, (err) => {
+                    assert.isNull(err);
+                    callback();
+                });
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Get process states by saved
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         saved: true
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+            },
+            // Get all process states
+            (callback) => {
+                this._persistence.getPageByFilter(
+                    null,
+                    new FilterParams(),
+                    new PagingParams(),
+                    (err, page) => {
+                        assert.isNull(err);
+                        assert.isObject(page);
+                        assert.lengthOf(page.data, 3);
+                        callback();
+                    }
+                );
+            },
 
-//                         assert.isObject(page);
-//                         assert.lengthOf(page.data, 2);
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Get process states by ids
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         ids: ['1', '3']
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
-
-//                         assert.isObject(page);
-//                         // PayPal manages ids by itself
-//                         //assert.lengthOf(page.data, 2);
-
-//                         callback();
-//                     }
-//                 );
-//             },
-//         ], done);
-//     }
-
-// }
+        ], done);
+    }
+}

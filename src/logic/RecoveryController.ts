@@ -49,7 +49,7 @@ export class RecoveryController {
         }
 
         // Send a recovery message
-        message.correlation_id = message.correlation_id ?? status.id;
+        message.correlation_id = message.correlation_id || status.id;
         queue.send(message.correlation_id, this._convertToMessageEnvelope(message), (err) => {
             if (err) {
                 callback(err, false);

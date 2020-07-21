@@ -462,7 +462,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             ProcessStateManager.repeatProcessActivation(process);
             RecoveryManager.clearRecovery(process);
             // Copy process data
-            process.data = state.data ?? process.data;
+            process.data = state.data || process.data;
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
             });
@@ -483,7 +483,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             RecoveryManager.setRecovery(process, recoveryQueueName, recoveryMessage, recoveryTimeout);
 
             // Copy process data
-            process.data = state.data ?? process.data;
+            process.data = state.data || process.data;
 
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
@@ -498,7 +498,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             ProcessStateManager.failProcess(process);
             RecoveryManager.clearRecovery(process);
             // Copy process data
-            process.data = state.data ?? process.data;
+            process.data = state.data || process.data;
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
             });
@@ -524,7 +524,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             RecoveryManager.setRecovery(process, state.recovery_queue_name, state.recovery_message, 0);
             ProcessStateManager.extendProcessExpiration(process);
             // Copy process data
-            process.data = state.data ?? process.data;
+            process.data = state.data || process.data;
             process.comment = comment;
             this._persistence.update(correlationId, process, callback);
             return process;
@@ -538,7 +538,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             ProcessStateManager.abortProcess(process);
             RecoveryManager.clearRecovery(process);
             // Copy over process data
-            process.data = state.data ?? process.data;
+            process.data = state.data || process.data;
             process.comment = comment;
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
@@ -554,7 +554,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             ProcessStateManager.completeProcess(process);
             RecoveryManager.clearRecovery(process);
             // Copy process data
-            process.data = state.data ?? process.data;
+            process.data = state.data || process.data;
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
             });
@@ -594,7 +594,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             RecoveryManager.setRecovery(process, recoveryQueue, recoveryMessage, recoveryTimeout);
 
             // Copy process data
-            process.data = state.data ?? process.data;
+            process.data = state.data || process.data;
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
             });
