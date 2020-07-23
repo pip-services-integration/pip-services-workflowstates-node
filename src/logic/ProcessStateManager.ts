@@ -7,28 +7,30 @@ import { IdGenerator, ApplicationException } from "pip-services3-commons-node";
 export class ProcessStateManager {
     private static _processTimeToLive: number = 7 * 24 * 60 * 60 * 1000;
 
-    public static checkNotExpired(process: ProcessStateV1):ProcessStoppedExceptionV1 {
+    public static checkNotExpired(process: ProcessStateV1): ProcessStoppedExceptionV1 {
         if (process.expiration_time < new Date())
             return new ProcessStoppedExceptionV1("Process " + process.id + " has expired");
         return null;
     }
 
-    public static checkActive(process: ProcessStateV1):ProcessStoppedExceptionV1 {
+    public static checkActive(process: ProcessStateV1): ProcessStoppedExceptionV1 {
         if (process.status != ProcessStatusV1.Running
             && process.status != ProcessStatusV1.Starting)
             return new ProcessStoppedExceptionV1("Process " + process.id + " cannot be activated");
         return null;
     }
 
-    public static checkPending(process: ProcessStateV1):ProcessStoppedExceptionV1 {
+    public static checkPending(process: ProcessStateV1): ProcessStoppedExceptionV1 {
         if (process.status != ProcessStatusV1.Failed
             && process.status != ProcessStatusV1.Suspended)
             return new ProcessStoppedExceptionV1("Cannot reactivate ended process " + process.id);
     }
 
     public static startProcess(processType: string, processKey: string, timeToLive: number, callback: (err: any, result: ProcessStateV1) => void): void {
-        if (processType == null)
+        if (processType == null) {
             callback(new ApplicationException("Process type cannot be null"), null);
+            return;
+        }
 
         var utcNow = new Date();
         timeToLive = timeToLive > 0 ? timeToLive : this._processTimeToLive;
@@ -70,7 +72,7 @@ export class ProcessStateManager {
         //process.ProcessState = ProcessState.Running;
         process.end_time = null;
         process.request = null;
-        process.recovery_attempts++;
+        process.recovery_attempts = process.recovery_attempts ? process.recovery_attempts + 1 : 1;
     }
 
     public static activateProcessWithFailure(process: ProcessStateV1) {

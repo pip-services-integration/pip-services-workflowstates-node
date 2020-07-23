@@ -23,8 +23,10 @@ class TasksManager {
     }
     static startTasks(process, taskType, queueName, message, callback) {
         if (taskType == null)
-            if (callback)
+            if (callback) {
                 callback(new pip_services3_commons_node_1.ApplicationException("Tasks type cannot be null"));
+                return;
+            }
         process.tasks = process.tasks || new Array();
         // Create a new one if it was not found
         var task = new TaskStateV1_1.TaskStateV1();
@@ -34,6 +36,8 @@ class TasksManager {
             task.queue_name = queueName,
             task.message = message;
         process.tasks.push(task);
+        if (callback)
+            callback(null);
     }
     static failTasks(process, errorMessage) {
         process.tasks = process.tasks || new Array();

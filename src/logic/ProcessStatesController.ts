@@ -5,7 +5,7 @@ import { IProcessStatesPersistence } from '../persistence/IProcessStatesPersiste
 import { ProcessStateV1, ProcessNotFoundExceptionV1, ProcessStatusV1, ProcessAlreadyExistExceptionV1, MessageV1 } from '../data/version1';
 import { ApplicationException, BadRequestException, DataPage, FilterParams, PagingParams, IReferences, IClosable, IOpenable, IConfigurable, ConfigParams, IReconfigurable, Descriptor, ICommandable, CommandSet } from 'pip-services3-commons-node';
 import { ProcessLockManager } from './ProcessLockManager';
-import { ProcessStateManager } from './ProcessStatusManager';
+import { ProcessStateManager } from './ProcessStateManager';
 import { TasksManager } from './TasksManager';
 import { RecoveryManager } from './RecoveryManager';
 import { IProcessStatesController } from './IProcessStatesController';
@@ -46,6 +46,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
 
     public constructor() {
     }
+
     getCommandSet(): CommandSet {
         this._commandset = this._commandset || new ProcessStateCommandSet(this);
         return this._commandset;
@@ -228,13 +229,17 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
         //var process = processKey != null ? await GetProcessAsync(processType, processKey, false) : null;
         this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
 
-            if (err) {
-                callback(err, null);
-                return;
-            }
+            // if (err) {
+            //     callback(err, null);
+            //     return;
+            // }
             if (process == null) {
                 // Starting a new process
                 ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, process) => {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
                     ProcessLockManager.lockProcess(process, taskType);
                     TasksManager.startTasks(process, taskType, queueName, message);
                     // Assign initiator id for processs created without key
@@ -250,8 +255,10 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
                     return;
                 }
                 // If it's active throw exception
-                if (process.status != ProcessStatusV1.Starting)
-                    throw new ProcessAlreadyExistExceptionV1("Process with key " + processKey + " already exist");
+                if (process.status != ProcessStatusV1.Starting) {
+                    callback(new ProcessAlreadyExistExceptionV1("Process with key " + processKey + " already exist"), null);
+                    return;
+                }
                 ProcessLockManager.lockProcess(process, taskType);
                 TasksManager.failTasks(process, "Lock timeout expired");
                 TasksManager.startTasks(process, taskType, queueName, message, (err) => {
@@ -303,7 +310,6 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
                     this._persistence.update(correlationId, process, callback);
                 });
             }
-            return process;
         });
     }
 
@@ -340,6 +346,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
                 callback(err, null);
                 return;
             }
+
             var checkRes = ProcessLockManager.checkNotLocked(process);
             if (checkRes) {
                 callback(checkRes, null);

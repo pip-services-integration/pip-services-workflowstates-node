@@ -15,7 +15,7 @@ export class TasksManager {
         ).length > 0;
     }
 
-    public static getExecutingTasks(process: ProcessStateV1, callback:(err:any, task:TaskStateV1)=>void):void  {
+    public static getExecutingTasks(process: ProcessStateV1, callback: (err: any, task: TaskStateV1) => void): void {
 
         var task: TaskStateV1 = null;
         // Find running task
@@ -34,8 +34,10 @@ export class TasksManager {
 
     public static startTasks(process: ProcessStateV1, taskType: string, queueName: string, message: MessageV1, callback?: (err: any) => void): void {
         if (taskType == null)
-            if (callback)
+            if (callback) {
                 callback(new ApplicationException("Tasks type cannot be null"));
+                return;
+            }
 
         process.tasks = process.tasks || new Array<TaskStateV1>();
 
@@ -49,6 +51,8 @@ export class TasksManager {
             task.message = message;
 
         process.tasks.push(task);
+        if (callback)
+            callback(null);
     }
 
     public static failTasks(process: ProcessStateV1, errorMessage: string) {

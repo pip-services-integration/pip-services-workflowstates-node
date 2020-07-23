@@ -5,7 +5,7 @@ let _ = require('lodash');
 const version1_1 = require("../data/version1");
 const pip_services3_commons_node_1 = require("pip-services3-commons-node");
 const ProcessLockManager_1 = require("./ProcessLockManager");
-const ProcessStatusManager_1 = require("./ProcessStatusManager");
+const ProcessStateManager_1 = require("./ProcessStateManager");
 const TasksManager_1 = require("./TasksManager");
 const RecoveryManager_1 = require("./RecoveryManager");
 const pip_services3_components_node_1 = require("pip-services3-components-node");
@@ -160,7 +160,7 @@ class ProcessStatesController {
             }
             // Relax rules for now - uncomment later
             //ProcessLockHandler.CheckLockValid(state);
-            checkRes = ProcessStatusManager_1.ProcessStateManager.checkActive(process);
+            checkRes = ProcessStateManager_1.ProcessStateManager.checkActive(process);
             if (checkRes) {
                 callback(checkRes, null);
                 return;
@@ -191,13 +191,17 @@ class ProcessStatesController {
     startProcess(correlationId, processType, processKey, taskType, queueName, message, timeToLive = 0, callback) {
         //var process = processKey != null ? await GetProcessAsync(processType, processKey, false) : null;
         this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
-            if (err) {
-                callback(err, null);
-                return;
-            }
+            // if (err) {
+            //     callback(err, null);
+            //     return;
+            // }
             if (process == null) {
                 // Starting a new process
-                ProcessStatusManager_1.ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, process) => {
+                ProcessStateManager_1.ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, process) => {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
                     ProcessLockManager_1.ProcessLockManager.lockProcess(process, taskType);
                     TasksManager_1.TasksManager.startTasks(process, taskType, queueName, message);
                     // Assign initiator id for processs created without key
@@ -213,8 +217,10 @@ class ProcessStatesController {
                     return;
                 }
                 // If it's active throw exception
-                if (process.status != version1_1.ProcessStatusV1.Starting)
-                    throw new version1_1.ProcessAlreadyExistExceptionV1("Process with key " + processKey + " already exist");
+                if (process.status != version1_1.ProcessStatusV1.Starting) {
+                    callback(new version1_1.ProcessAlreadyExistExceptionV1("Process with key " + processKey + " already exist"), null);
+                    return;
+                }
                 ProcessLockManager_1.ProcessLockManager.lockProcess(process, taskType);
                 TasksManager_1.TasksManager.failTasks(process, "Lock timeout expired");
                 TasksManager_1.TasksManager.startTasks(process, taskType, queueName, message, (err) => {
@@ -232,7 +238,7 @@ class ProcessStatesController {
         this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
             if (process == null) {
                 // Starting a new process
-                ProcessStatusManager_1.ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, item) => {
+                ProcessStateManager_1.ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, item) => {
                     process = item;
                     TasksManager_1.TasksManager.startTasks(process, taskType, queueName, message, (err) => {
                         if (err) {
@@ -252,7 +258,7 @@ class ProcessStatesController {
                     callback(checkRes, null);
                     return;
                 }
-                checkRes = ProcessStatusManager_1.ProcessStateManager.checkActive(process);
+                checkRes = ProcessStateManager_1.ProcessStateManager.checkActive(process);
                 if (checkRes) {
                     callback(checkRes, null);
                     return;
@@ -264,7 +270,6 @@ class ProcessStatesController {
                     this._persistence.update(correlationId, process, callback);
                 });
             }
-            return process;
         });
     }
     activateProcess(correlationId, processId, taskType, queueName, message, callback) {
@@ -278,7 +283,7 @@ class ProcessStatesController {
                 callback(checkRes, null);
                 return;
             }
-            var checkRes = ProcessStatusManager_1.ProcessStateManager.checkActive(process);
+            var checkRes = ProcessStateManager_1.ProcessStateManager.checkActive(process);
             if (checkRes) {
                 callback(checkRes, null);
                 return;
@@ -302,7 +307,7 @@ class ProcessStatesController {
                 callback(checkRes, null);
                 return;
             }
-            checkRes = ProcessStatusManager_1.ProcessStateManager.checkActive(process);
+            checkRes = ProcessStateManager_1.ProcessStateManager.checkActive(process);
             if (checkRes) {
                 callback(checkRes, null);
                 return;
@@ -323,7 +328,7 @@ class ProcessStatesController {
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.completeTasks(process);
-            ProcessStatusManager_1.ProcessStateManager.continueProcess(process);
+            ProcessStateManager_1.ProcessStateManager.continueProcess(process);
             RecoveryManager_1.RecoveryManager.clearRecovery(process);
             // Copy process data
             process.data = state.data || process.data;
@@ -338,7 +343,7 @@ class ProcessStatesController {
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.completeTasks(process);
-            ProcessStatusManager_1.ProcessStateManager.continueProcess(process);
+            ProcessStateManager_1.ProcessStateManager.continueProcess(process);
             RecoveryManager_1.RecoveryManager.setRecovery(process, recoveryQueueName, recoveryMessage, recoveryTimeout);
             // Copy process data
             process.data = state.data || process.data;
@@ -353,7 +358,7 @@ class ProcessStatesController {
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.completeTasks(process);
-            ProcessStatusManager_1.ProcessStateManager.repeatProcessActivation(process);
+            ProcessStateManager_1.ProcessStateManager.repeatProcessActivation(process);
             RecoveryManager_1.RecoveryManager.setRecovery(process, null, null, recoveryTimeout);
             // Copy process data
             process.data = state.data || process.data;
@@ -373,7 +378,7 @@ class ProcessStatesController {
             else {
                 ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
                 TasksManager_1.TasksManager.rollbackTasks(process);
-                ProcessStatusManager_1.ProcessStateManager.repeatProcessActivation(process);
+                ProcessStateManager_1.ProcessStateManager.repeatProcessActivation(process);
                 RecoveryManager_1.RecoveryManager.retryRecovery(process);
                 // Copy process data
                 process.data = state.data || process.data;
@@ -391,7 +396,7 @@ class ProcessStatesController {
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.completeTasks(process);
-            ProcessStatusManager_1.ProcessStateManager.requestProcessResponse(process, request);
+            ProcessStateManager_1.ProcessStateManager.requestProcessResponse(process, request);
             RecoveryManager_1.RecoveryManager.setRecovery(process, recoveryQueueName, recoveryMessage);
             // Copy process data
             process.data = state.data || process.data;
@@ -407,7 +412,7 @@ class ProcessStatesController {
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.failTasks(process, errorMessage);
-            ProcessStatusManager_1.ProcessStateManager.repeatProcessActivation(process);
+            ProcessStateManager_1.ProcessStateManager.repeatProcessActivation(process);
             RecoveryManager_1.RecoveryManager.clearRecovery(process);
             // Copy process data
             process.data = state.data || process.data;
@@ -424,7 +429,7 @@ class ProcessStatesController {
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.failTasks(process, errorMessage);
-            ProcessStatusManager_1.ProcessStateManager.repeatProcessActivation(process);
+            ProcessStateManager_1.ProcessStateManager.repeatProcessActivation(process);
             //ProcessStateManager.ActivateProcessWithFailure(process);
             RecoveryManager_1.RecoveryManager.setRecovery(process, recoveryQueueName, recoveryMessage, recoveryTimeout);
             // Copy process data
@@ -438,7 +443,7 @@ class ProcessStatesController {
         this._getProcessByState(state, (err, process) => {
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.failTasks(process, errorMessage);
-            ProcessStatusManager_1.ProcessStateManager.failProcess(process);
+            ProcessStateManager_1.ProcessStateManager.failProcess(process);
             RecoveryManager_1.RecoveryManager.clearRecovery(process);
             // Copy process data
             process.data = state.data || process.data;
@@ -454,17 +459,17 @@ class ProcessStatesController {
                 callback(err, null);
                 return;
             }
-            var checkRes = ProcessStatusManager_1.ProcessStateManager.checkPending(process);
+            var checkRes = ProcessStateManager_1.ProcessStateManager.checkPending(process);
             if (checkRes) {
                 callback(checkRes, null);
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             if (TasksManager_1.TasksManager.hasCompletedTasks(process))
-                ProcessStatusManager_1.ProcessStateManager.continueProcess(process);
+                ProcessStateManager_1.ProcessStateManager.continueProcess(process);
             else
-                ProcessStatusManager_1.ProcessStateManager.restartProcess(process);
+                ProcessStateManager_1.ProcessStateManager.restartProcess(process);
             RecoveryManager_1.RecoveryManager.setRecovery(process, state.recovery_queue_name, state.recovery_message, 0);
-            ProcessStatusManager_1.ProcessStateManager.extendProcessExpiration(process);
+            ProcessStateManager_1.ProcessStateManager.extendProcessExpiration(process);
             // Copy process data
             process.data = state.data || process.data;
             process.comment = comment;
@@ -476,7 +481,7 @@ class ProcessStatesController {
         this._getProcessByState(state, (err, process) => {
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.failTasks(process, "Lock timeout expired");
-            ProcessStatusManager_1.ProcessStateManager.abortProcess(process);
+            ProcessStateManager_1.ProcessStateManager.abortProcess(process);
             RecoveryManager_1.RecoveryManager.clearRecovery(process);
             // Copy over process data
             process.data = state.data || process.data;
@@ -490,7 +495,7 @@ class ProcessStatesController {
         this._getActiveProcess(state, (err, process) => {
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             TasksManager_1.TasksManager.completeTasks(process);
-            ProcessStatusManager_1.ProcessStateManager.completeProcess(process);
+            ProcessStateManager_1.ProcessStateManager.completeProcess(process);
             RecoveryManager_1.RecoveryManager.clearRecovery(process);
             // Copy process data
             process.data = state.data || process.data;
@@ -521,7 +526,7 @@ class ProcessStatesController {
                 return;
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
-            ProcessStatusManager_1.ProcessStateManager.requestProcessResponse(process, request);
+            ProcessStateManager_1.ProcessStateManager.requestProcessResponse(process, request);
             // TODO: need added recovery time or not?  Add timeout to interface
             RecoveryManager_1.RecoveryManager.setRecovery(process, recoveryQueue, recoveryMessage, recoveryTimeout);
             // Copy process data
