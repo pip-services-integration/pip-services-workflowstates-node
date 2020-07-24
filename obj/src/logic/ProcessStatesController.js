@@ -86,7 +86,7 @@ class ProcessStatesController {
         this._counters.setReferences(references);
         this._persistence = references.getOneRequired(new pip_services3_commons_node_1.Descriptor("pip-services-processstates", "persistence", "*", "*", "1.0"));
     }
-    _getProcess(processType, processKey, initiatorId, callback) {
+    _getProcess(processType, processKey, initiatorId, errEnable = true, callback) {
         if (processType == null) {
             callback(new pip_services3_commons_node_1.ApplicationException("Process type cannot be null"), null);
             return;
@@ -102,7 +102,7 @@ class ProcessStatesController {
                     callback(err, null);
                     return;
                 }
-                if (item == null) {
+                if (item == null && errEnable) {
                     callback(new pip_services3_commons_node_1.ApplicationException("Process with key " + processKey + " was does not exist"), null); //ProcessNotFoundException
                     return;
                 }
@@ -115,7 +115,7 @@ class ProcessStatesController {
                     callback(err, null);
                     return;
                 }
-                if (item == null) {
+                if (item == null && errEnable) {
                     callback(new pip_services3_commons_node_1.ApplicationException("Process with key " + processKey + " was does not exist"), null); //ProcessNotFoundException
                     return;
                 }
@@ -190,11 +190,11 @@ class ProcessStatesController {
     }
     startProcess(correlationId, processType, processKey, taskType, queueName, message, timeToLive = 0, callback) {
         //var process = processKey != null ? await GetProcessAsync(processType, processKey, false) : null;
-        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
-            // if (err) {
-            //     callback(err, null);
-            //     return;
-            // }
+        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, false, (err, process) => {
+            if (err) {
+                callback(err, null);
+                return;
+            }
             if (process == null) {
                 // Starting a new process
                 ProcessStateManager_1.ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, process) => {
@@ -235,11 +235,11 @@ class ProcessStatesController {
         });
     }
     activateOrStartProcess(correlationId, processType, processKey, taskType, queueName, message, timeToLive = 0, callback) {
-        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
-            // if (err) {
-            //     callback(err, null);
-            //     return;
-            // }
+        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, false, (err, process) => {
+            if (err) {
+                callback(err, null);
+                return;
+            }
             if (process == null) {
                 // Starting a new process
                 ProcessStateManager_1.ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, item) => {
@@ -305,7 +305,7 @@ class ProcessStatesController {
         });
     }
     activateProcessByKey(correlationId, processType, processKey, taskType, queueName, message, callback) {
-        this._getProcess(processType, processKey, null, (err, process) => {
+        this._getProcess(processType, processKey, null, true, (err, process) => {
             if (err) {
                 callback(err, null);
                 return;

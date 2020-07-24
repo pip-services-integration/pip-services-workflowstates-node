@@ -687,13 +687,13 @@ suite('ProcessStatesController', () => {
         });
     });
 
-    // TODO: Need check this test!
-    // test("Return Error If Process Key Null", (done) => {
-    //     _controller.activateOrStartProcess(null, "type", null, "type", null, new MessageV1(), 0, (err, item) => {
-    //         assert.isNotNull(err);
-    //         done();
-    //     });
-    // });
+    //TODO: Need check this test!
+    test("Return Error If Process Key Null", (done) => {
+        _controller.activateOrStartProcess(null, "type", null, "type", null, new MessageV1(), 0, (err, item) => {
+            assert.isNotNull(err);
+            done();
+        });
+    });
 
 
     test("Resume Without Completed Tasks Process", (done) => {

@@ -115,7 +115,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
     }
 
     private _getProcess(
-        processType: string, processKey: string, initiatorId: string, callback: (err: any, result: ProcessStateV1) => void): void {
+        processType: string, processKey: string, initiatorId: string, errEnable:boolean = true, callback: (err: any, result: ProcessStateV1) => void): void {
         if (processType == null) {
             callback(new ApplicationException("Process type cannot be null"), null);
             return;
@@ -132,7 +132,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
                     callback(err, null);
                     return;
                 }
-                if (item == null) {
+                if (item == null && errEnable) {
                     callback(new ApplicationException("Process with key " + processKey + " was does not exist"), null); //ProcessNotFoundException
                     return;
                 }
@@ -144,7 +144,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
                     callback(err, null);
                     return;
                 }
-                if (item == null) {
+                if (item == null && errEnable) {
                     callback(new ApplicationException("Process with key " + processKey + " was does not exist"), null); //ProcessNotFoundException
                     return;
                 }
@@ -227,12 +227,12 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
     public startProcess(correlationId: string, processType: string, processKey: string,
         taskType: string, queueName: string, message: MessageV1, timeToLive: number = 0, callback: (err: any, item: ProcessStateV1) => void): void {
         //var process = processKey != null ? await GetProcessAsync(processType, processKey, false) : null;
-        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
+        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, false,  (err, process) => {
 
-            // if (err) {
-            //     callback(err, null);
-            //     return;
-            // }
+            if (err) {
+                callback(err, null);
+                return;
+            }
             if (process == null) {
                 // Starting a new process
                 ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, process) => {
@@ -275,11 +275,11 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
 
     public activateOrStartProcess(correlationId: string, processType: string, processKey: string,
         taskType: string, queueName: string, message: MessageV1, timeToLive: number = 0, callback: (err: any, item: ProcessStateV1) => void): void {
-        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
-            // if (err) {
-            //     callback(err, null);
-            //     return;
-            // }
+        this._getProcess(processType, processKey, message != null ? message.correlation_id : null, false, (err, process) => {
+            if (err) {
+                callback(err, null);
+                return;
+            }
             if (process == null) {
                 // Starting a new process
                 ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, item) => {
@@ -348,7 +348,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
 
     public activateProcessByKey(correlationId: string, processType: string, processKey: string,
         taskType: string, queueName: string, message: MessageV1, callback: (err: any, state: ProcessStateV1) => void): void {
-        this._getProcess(processType, processKey, null, (err, process) => {
+        this._getProcess(processType, processKey, null, true, (err, process) => {
             if (err) {
                 callback(err, null);
                 return;
