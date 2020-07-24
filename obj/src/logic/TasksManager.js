@@ -7,13 +7,14 @@ const ProcessInvalidStateExceptionV1_1 = require("../data/version1/ProcessInvali
 const pip_services3_commons_node_1 = require("pip-services3-commons-node");
 class TasksManager {
     static hasCompletedTasks(process) {
-        return _.filter(process.tasks, a => a.State == TaskStatusV1_1.TaskStatusV1.Completed).length > 0;
+        let items = _.filter(process.tasks, (a) => { return a.status == TaskStatusV1_1.TaskStatusV1.Completed; });
+        return items.length > 0;
     }
     static getExecutingTasks(process, callback) {
         var task = null;
         // Find running task
         if (process.tasks != null) {
-            var items = _.filter(process.tasks, a => a.State == TaskStatusV1_1.TaskStatusV1.Executing);
+            var items = _.filter(process.tasks, (a) => { return a.status == TaskStatusV1_1.TaskStatusV1.Executing; });
             task = items.length > 0 ? items[0] : null;
         }
         // If task does exist raise error

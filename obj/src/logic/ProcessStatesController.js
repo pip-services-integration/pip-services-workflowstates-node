@@ -236,9 +236,17 @@ class ProcessStatesController {
     }
     activateOrStartProcess(correlationId, processType, processKey, taskType, queueName, message, timeToLive = 0, callback) {
         this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
+            // if (err) {
+            //     callback(err, null);
+            //     return;
+            // }
             if (process == null) {
                 // Starting a new process
                 ProcessStateManager_1.ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, item) => {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
                     process = item;
                     TasksManager_1.TasksManager.startTasks(process, taskType, queueName, message, (err) => {
                         if (err) {
@@ -462,6 +470,7 @@ class ProcessStatesController {
             var checkRes = ProcessStateManager_1.ProcessStateManager.checkPending(process);
             if (checkRes) {
                 callback(checkRes, null);
+                return;
             }
             ProcessLockManager_1.ProcessLockManager.unlockProcess(process);
             if (TasksManager_1.TasksManager.hasCompletedTasks(process))
@@ -474,7 +483,6 @@ class ProcessStatesController {
             process.data = state.data || process.data;
             process.comment = comment;
             this._persistence.update(correlationId, process, callback);
-            return process;
         });
     }
     abortProcess(correlationId, state, comment, callback) {
@@ -502,7 +510,6 @@ class ProcessStatesController {
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
             });
-            return process;
         });
     }
     clearProcessRecovery(correlationId, state, callback) {

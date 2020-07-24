@@ -10,9 +10,10 @@ import { ApplicationException } from "pip-services3-commons-node";
 
 export class TasksManager {
     public static hasCompletedTasks(process: ProcessStateV1): boolean {
-        return _.filter(process.tasks,
-            a => a.State == TaskStatusV1.Completed
-        ).length > 0;
+         let items = _.filter(process.tasks,
+            (a) => {return a.status == TaskStatusV1.Completed}
+        );
+        return items.length > 0;
     }
 
     public static getExecutingTasks(process: ProcessStateV1, callback: (err: any, task: TaskStateV1) => void): void {
@@ -21,7 +22,7 @@ export class TasksManager {
         // Find running task
         if (process.tasks != null) {
             var items = _.filter(process.tasks,
-                a => a.State == TaskStatusV1.Executing
+                (a) => { return a.status == TaskStatusV1.Executing}
             )
             task = items.length > 0 ? items[0] : null;
         }

@@ -276,10 +276,17 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
     public activateOrStartProcess(correlationId: string, processType: string, processKey: string,
         taskType: string, queueName: string, message: MessageV1, timeToLive: number = 0, callback: (err: any, item: ProcessStateV1) => void): void {
         this._getProcess(processType, processKey, message != null ? message.correlation_id : null, (err, process) => {
-
+            // if (err) {
+            //     callback(err, null);
+            //     return;
+            // }
             if (process == null) {
                 // Starting a new process
                 ProcessStateManager.startProcess(processType, processKey, timeToLive, (err, item) => {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
                     process = item;
                     TasksManager.startTasks(process, taskType, queueName, message, (err) => {
                         if (err) {
@@ -522,6 +529,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             var checkRes = ProcessStateManager.checkPending(process);
             if (checkRes) {
                 callback(checkRes, null);
+                return;
             }
             ProcessLockManager.unlockProcess(process);
             if (TasksManager.hasCompletedTasks(process))
@@ -534,7 +542,6 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             process.data = state.data || process.data;
             process.comment = comment;
             this._persistence.update(correlationId, process, callback);
-            return process;
         });
     }
 
@@ -565,7 +572,6 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
             this._persistence.update(correlationId, process, (err, item) => {
                 callback(err);
             });
-            return process;
         });
     }
 

@@ -10,9 +10,8 @@ import { PagingParams } from "pip-services3-commons-node";
 
 import { ProcessStatesMemoryPersistence } from "../../src/persistence/ProcessStatesMemoryPersistence";
 import { ProcessStatesController } from "../../src/logic/ProcessStatesController";
-import { ProcessStateV1, ProcessStatusV1, MessageV1 } from "../../src/data/version1";
-import { callbackify } from "util";
-import { MessageEnvelope } from "pip-services3-messaging-node";
+import { ProcessStateV1, ProcessStatusV1, MessageV1, TaskStatusV1 } from "../../src/data/version1";
+import { TaskStateV1 } from "../../src/data/version1/TaskStateV1";
 
 let MESSAGE1: MessageV1 = {
     correlation_id: "test_processes1",
@@ -681,21 +680,267 @@ suite('ProcessStatesController', () => {
     });
 
 
-    test("Return_Error_If_Process_Type_Null", (done) => {
-        _controller.activateOrStartProcess(null, null, "key", "type", null, null, null, (err, process) => {
+    test("Return Error If Process Type Null", (done) => {
+        _controller.activateOrStartProcess(null, null, "key", "type", null, null, 0, (err, process) => {
             assert.isNotNull(err);
             done();
         });
+    });
+
+    // TODO: Need check this test!
+    // test("Return Error If Process Key Null", (done) => {
+    //     _controller.activateOrStartProcess(null, "type", null, "type", null, new MessageV1(), 0, (err, item) => {
+    //         assert.isNotNull(err);
+    //         done();
+    //     });
+    // });
+
+
+    test("Resume Without Completed Tasks Process", (done) => {
+        let process: ProcessStateV1 = new ProcessStateV1();
+        process.id = "id";
+        process.lock_token = "token";
+        process.locked_until_time = new Date();
+        process.status = ProcessStatusV1.Suspended;
+        process.tasks = new Array<TaskStateV1>();
+
+        async.series([
+            (callback) => {
+                _persistence.create(null, process, (err, item) => {
+                    assert.isNull(err);
+                    process = item;
+                    callback();
+                })
+            },
+            (callback) => {
+                _controller.resumeProcess(null, process, "comment", (err, processResult) => {
+                    assert.isNull(err);
+                    assert.equal(ProcessStatusV1.Starting, processResult.status);
+                    assert.equal("comment", processResult.comment);
+                    callback();
+                });
+            }], (err) => {
+                done(err);
+            });
     });
 
 
     // It_Should_()
-    test("Return Error If Process Key Null", (done) => {
-        _controller.activateOrStartProcess(null, "type", null, "type", null, null, 0, (err, item) => {
-            assert.isNotNull(err);
-            done();
-        });
+    test("Resume With Completed Tasks Process", (done) => {
+        let process: ProcessStateV1 = new ProcessStateV1();
+        process.id = "id";
+        process.lock_token = "token";
+        process.locked_until_time = new Date();
+        process.status = ProcessStatusV1.Suspended;
+        process.tasks = new Array<TaskStateV1>();
+        let task: TaskStateV1 = new TaskStateV1();
+        task.status = TaskStatusV1.Completed;
+        task.queue_name = "activity queue name";
+        process.tasks.push(task);
+
+        async.series([
+            (callback) => {
+                _persistence.create(null, process, (err, item) => {
+                    assert.isNull(err);
+                    process = item;
+                    callback();
+                })
+            },
+            (callback) => {
+                _controller.resumeProcess(null, process, "comment", (err, processResult) => {
+                    assert.isNull(err);
+                    assert.equal(ProcessStatusV1.Running, processResult.status);
+                    assert.equal("comment", processResult.comment);
+                    callback();
+                });
+            }], (err) => {
+                done(err);
+            });
     });
-       
+
+
+    test("Clear Compensation Message In Process", (done) => {
+        let process: ProcessStateV1 = new ProcessStateV1();
+        process.id = "id";
+        process.lock_token = "token";
+        process.locked_until_time = new Date();
+        process.status = ProcessStatusV1.Running;
+        process.recovery_message = new MessageV1();
+        process.recovery_time = new Date();
+        process.recovery_queue_name = "queue";
+
+        async.series([
+            (callback) => {
+                _persistence.create(null, process, (err, item) => {
+                    assert.isNull(err);
+                    process = item;
+                    callback();
+                })
+            },
+            (callback) => {
+                _controller.clearProcessRecovery(null, process, (err) => {
+                    assert.isNull(err);
+                    callback();
+                });
+            },
+            (callback) => {
+                _persistence.getOneById(null, process.id, (err, processResult) => {
+                    assert.isNull(err);
+                    assert.equal(process.id, processResult.id);
+                    assert.isNull(processResult.recovery_queue_name);
+                    assert.isNull(processResult.recovery_time);
+                    assert.isNull(processResult.recovery_message);
+                    callback();
+                })
+            }], (err) => {
+                done(err);
+            });
+    });
+
+    test("Update Process", (done) => {
+        let process: ProcessStateV1 = new ProcessStateV1();
+        process.id = "id";
+        process.lock_token = "token";
+        process.locked_until_time = new Date();
+        process.status = ProcessStatusV1.Running;
+        process.recovery_message = new MessageV1();
+        process.recovery_time = new Date();
+        process.recovery_queue_name = "queue";
+
+        async.series([
+            (callback) => {
+                _persistence.create(null, process, (err, item) => {
+                    assert.isNull(err);
+                    callback();
+                })
+            },
+            (callback) => {
+                process.recovery_queue_name = "updated queue";
+                _controller.updateProcess(null, process, (err, resultProcess) => {
+                    assert.isNull(err);
+                    assert.isNotNull(resultProcess);
+                    assert.equal(resultProcess.id, process.id);
+                    assert.equal(resultProcess.recovery_queue_name, process.recovery_queue_name);
+                    callback();
+                });
+            }], (err) => {
+                done(err);
+            });
+    });
+
+    test("Delete Process", (done) => {
+        let process: ProcessStateV1 = new ProcessStateV1();
+        process.id = "id";
+        process.lock_token = "token";
+        process.locked_until_time = new Date();
+        process.status = ProcessStatusV1.Running;
+        process.recovery_message = new MessageV1();
+        process.recovery_time = new Date();
+        process.recovery_queue_name = "queue";
+
+        async.series([
+            (callback) => {
+                _persistence.create(null, process, (err, item) => {
+                    assert.isNull(err);
+                    callback();
+                })
+            },
+            (callback) => {
+                _controller.deleteProcessById(null, process.id, (err) => {
+                    assert.isNull(err);
+                    callback();
+                });
+            },
+            (callback) => {
+                _persistence.getOneById(null, process.id, (err, processResult) => {
+                    assert.isNull(err);
+                    assert.isNull(processResult);
+                    callback();
+                })
+            }], (err) => {
+                done(err);
+            });
+    });
+
+    // It_Should_()
+    test("Truncate Process", (done) => {
+
+        let process1: ProcessStateV1 = new ProcessStateV1();
+        let process2: ProcessStateV1 = new ProcessStateV1();
+        let process3: ProcessStateV1 = new ProcessStateV1();
+        
+        process1.id = "id1";
+        process1.lock_token = "token";
+        process1.locked_until_time = new Date();
+        process1.status = ProcessStatusV1.Completed;
+        process1.recovery_message = new MessageV1();
+        process1.recovery_time = new Date();
+        process1.recovery_queue_name = "queue";
+
+        process2.id = "id2";
+        process2.lock_token = "token";
+        process2.locked_until_time = new Date();
+        process2.status = ProcessStatusV1.Aborted;
+        process2.recovery_message = new MessageV1();
+        process2.recovery_time = new Date();
+        process2.recovery_queue_name = "queue";
+
+        process3.id = "id3";
+        process3.lock_token = "token";
+        process3.locked_until_time = new Date();
+        process3.status = ProcessStatusV1.Running;
+        process3.recovery_message = new MessageV1();
+        process3.recovery_time = new Date();
+        process3.recovery_queue_name = "queue";
+
+        async.series([
+            (callback) => {
+                _persistence.create(null, process1, (err, item) => {
+                    assert.isNull(err);
+                    callback();
+                })
+            },
+            (callback) => {
+                _persistence.create(null, process2, (err, item) => {
+                    assert.isNull(err);
+                    callback();
+                })
+            },
+            (callback) => {
+                _persistence.create(null, process3, (err, item) => {
+                    assert.isNull(err);
+                    callback();
+                })
+            },
+            (callback) => {
+                _controller.truncate(null, 0, (err) => {
+                    assert.isNull(err);
+                    callback();
+                });
+            },
+            (callback) => {
+                _persistence.getOneById(null, process1.id, (err, processResult) => {
+                    assert.isNull(err);
+                    assert.isNull(processResult);
+                    callback();
+                })
+            },
+            (callback) => {
+                _persistence.getOneById(null, process2.id, (err, processResult) => {
+                    assert.isNull(err);
+                    assert.isNull(processResult);
+                    callback();
+                })
+            },
+            (callback) => {
+                _persistence.getOneById(null, process3.id, (err, processResult) => {
+                    assert.isNull(err);
+                    assert.equal(process3.id, processResult.id);
+                    callback();
+                })
+            }], (err) => {
+                done(err);
+            });
+    });
 
 })
