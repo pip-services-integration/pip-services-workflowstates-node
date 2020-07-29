@@ -61,7 +61,7 @@ class TasksManager {
     }
     static rollbackTasks(process) {
         process.tasks = process.tasks || new Array();
-        process.tasks = _.filter(process.tasks, a => a.State != TaskStatusV1_1.TaskStatusV1.Executing);
+        process.tasks = _.filter(process.tasks, a => a.status != TaskStatusV1_1.TaskStatusV1.Executing);
     }
     static completeTasks(process) {
         process.tasks = process.tasks || new Array();

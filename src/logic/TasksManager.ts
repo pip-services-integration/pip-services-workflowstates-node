@@ -82,7 +82,7 @@ export class TasksManager {
         process.tasks = process.tasks || new Array<TaskStateV1>();
 
         process.tasks = _.filter(process.tasks,
-            a => a.State != TaskStatusV1.Executing
+            a => a.status != TaskStatusV1.Executing
         );
     }
 

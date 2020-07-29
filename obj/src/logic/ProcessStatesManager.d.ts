@@ -1,6 +1,6 @@
 import { ProcessStateV1 } from "../data/version1/ProcessStateV1";
 import { ProcessStoppedExceptionV1 } from '../data/version1/ProcessStoppedExceptionV1';
-export declare class ProcessStateManager {
+export declare class ProcessStatesManager {
     private static _processTimeToLive;
     static checkNotExpired(process: ProcessStateV1): ProcessStoppedExceptionV1;
     static checkActive(process: ProcessStateV1): ProcessStoppedExceptionV1;

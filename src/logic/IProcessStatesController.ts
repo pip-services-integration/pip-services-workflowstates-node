@@ -30,7 +30,7 @@ export interface IProcessStatesController {
 
     rollbackProcess(correlationId: string, state: ProcessStateV1,
         callback: (err: any) => void): void;
-    
+
     continueProcess(correlationId: string, state: ProcessStateV1,
         callback: (err: any) => void): void;
 
@@ -43,33 +43,35 @@ export interface IProcessStatesController {
 
     clearProcessRecovery(correlationId: string, state: ProcessStateV1,
         callback: (err: any) => void): void;
-            
+
     failAndContinueProcess(correlationId: string, state: ProcessStateV1, errorMessage: string,
         callback: (err: any) => void): void;
 
     failAndRecoverProcess(correlationId: string, state: ProcessStateV1, errorMessage: string,
         recoveryQueue: string, recoveryMessage: MessageV1, recoveryTimeout: number,
         callback: (err: any) => void): void;
-    
+
     suspendProcess(correlationId: string, state: ProcessStateV1, request: string,
-        recoveryQueue: string, recoveryMessage: MessageV1, recoveryTimeout:number,
+        recoveryQueue: string, recoveryMessage: MessageV1, recoveryTimeout: number,
         callback: (err: any) => void): void;
-    
+
     failProcess(correlationId: string, state: ProcessStateV1, errorMessage: string,
         callback: (err: any) => void): void;
-            
+
     resumeProcess(correlationId: string, state: ProcessStateV1, comment: string,
         callback: (err: any, state: ProcessStateV1) => void): void;
-    
+
     completeProcess(correlationId: string, state: ProcessStateV1,
         callback: (err: any) => void): void;
 
     abortProcess(correlationId: string, state: ProcessStateV1, comment: string,
         callback: (err: any) => void): void;
-    
-    updateProcess(correlationId: string, state: ProcessStateV1, 
+
+    updateProcess(correlationId: string, state: ProcessStateV1,
         callback: (err: any, state: ProcessStateV1) => void): void;
 
     deleteProcessById(correlationId: string, processId: string,
-        callback: (err: any, state: ProcessStateV1) => void): void;    
+        callback: (err: any, state: ProcessStateV1) => void): void;
+
+    truncate(correlationId: string, timeout: number, callback: (err: any) => void): void;
 }

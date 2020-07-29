@@ -4,7 +4,7 @@ import { ProcessStatusV1 } from "../data/version1/ProcessStatusV1";
 import { TaskStateV1 } from "../data/version1";
 import { IdGenerator, ApplicationException } from "pip-services3-commons-node";
 
-export class ProcessStateManager {
+export class ProcessStatesManager {
     private static _processTimeToLive: number = 7 * 24 * 60 * 60 * 1000;
 
     public static checkNotExpired(process: ProcessStateV1): ProcessStoppedExceptionV1 {
@@ -50,7 +50,7 @@ export class ProcessStateManager {
     }
 
     public static extendProcessExpiration(process: ProcessStateV1): ProcessStateV1 {
-        process.expiration_time = new Date(Date.now() + ProcessStateManager._processTimeToLive);
+        process.expiration_time = new Date(Date.now() + ProcessStatesManager._processTimeToLive);
         return process;
     }
 

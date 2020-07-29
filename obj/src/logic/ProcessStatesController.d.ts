@@ -4,18 +4,10 @@ import { IProcessStatesController } from './IProcessStatesController';
 export declare class ProcessStatesController implements IProcessStatesController, IOpenable, IConfigurable, IReconfigurable, ICommandable {
     private _persistence;
     private _config;
-    private _recoveryController;
     private _logger;
     private _counters;
     protected _opened: boolean;
     private _commandset;
-    private _truncate_timer;
-    private _recovery_timer;
-    private _close_exp_timer;
-    private _trunc_interval;
-    private _close_exp_interval;
-    private _recovery_interval;
-    private readonly _batchSize;
     constructor();
     getCommandSet(): CommandSet;
     configure(config: ConfigParams): void;
@@ -49,7 +41,4 @@ export declare class ProcessStatesController implements IProcessStatesController
     deleteProcessById(correlationId: string, processId: string, callback: (err: any, state: ProcessStateV1) => void): void;
     suspendProcess(correlationId: string, state: ProcessStateV1, request: string, recoveryQueue: string, recoveryMessage: MessageV1, recoveryTimeout: number, callback: (err: any) => void): void;
     truncate(correlationId: string, timeout: number, callback: (err: any) => void): void;
-    private _truncateProcessing;
-    private _recoveryProcessing;
-    private _closeExpiredProcessing;
 }

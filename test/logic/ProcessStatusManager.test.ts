@@ -1,5 +1,5 @@
 import { ProcessStateV1 } from "../../src/data/version1/ProcessStateV1";
-import { ProcessStateManager } from "../../src/logic/ProcessStateManager";
+import { ProcessStatesManager } from "../../src/logic/ProcessStatesManager";
 import { ProcessStatusV1 } from "../../src/data/version1/ProcessStatusV1";
 
 const _ = require('lodash');
@@ -13,65 +13,65 @@ suite('ProcessStatusManager', () => {
 
         async.series([
             (callback) => {
-                ProcessStateManager.checkNotExpired(process);
+                ProcessStatesManager.checkNotExpired(process);
 
                 process = new ProcessStateV1();
                 process.status = ProcessStatusV1.Completed;
-                ProcessStateManager.checkActive(process);
+                ProcessStatesManager.checkActive(process);
 
                 process = new ProcessStateV1();
                 process.status = ProcessStatusV1.Completed;
-                ProcessStateManager.checkPending(process);
+                ProcessStatesManager.checkPending(process);
                 callback();
             },
             (callback) => {
-                ProcessStateManager.startProcess(null, null, null, (err, item) => {
+                ProcessStatesManager.startProcess(null, null, null, (err, item) => {
                     assert.isNotNull(err);
                     callback();
                 });
             },
             (callback) => {
                 process = new ProcessStateV1();
-                let result: ProcessStateV1 = ProcessStateManager.extendProcessExpiration(process);
+                let result: ProcessStateV1 = ProcessStatesManager.extendProcessExpiration(process);
                 assert.isNotNull(result.expiration_time);
 
                 process = new ProcessStateV1();
-                ProcessStateManager.restartProcess(process);
+                ProcessStatesManager.restartProcess(process);
                 assert.isNull(process.end_time);
                 assert.isNull(process.request);
                 assert.equal(0, process.recovery_attempts);
                 assert.equal(ProcessStatusV1.Starting, process.status);
 
                 process = new ProcessStateV1();
-                ProcessStateManager.continueProcess(process);
+                ProcessStatesManager.continueProcess(process);
                 assert.isNull(process.end_time);
                 assert.isNull(process.request);
                 assert.equal(ProcessStatusV1.Running, process.status);
 
                 process = new ProcessStateV1();
                 process.recovery_attempts = 6;
-                ProcessStateManager.repeatProcessActivation(process);
+                ProcessStatesManager.repeatProcessActivation(process);
                 assert.isNull(process.end_time);
                 assert.isNull(process.request);
                 assert.equal(7, process.recovery_attempts);
 
                 process = new ProcessStateV1();
                 process.recovery_attempts = 6;
-                ProcessStateManager.activateProcessWithFailure(process);
+                ProcessStatesManager.activateProcessWithFailure(process);
                 assert.isNull(process.end_time);
                 assert.isNull(process.request);
                 assert.equal(7, process.recovery_attempts);
                 assert.equal(ProcessStatusV1.Running, process.status);
 
                 process = new ProcessStateV1();
-                ProcessStateManager.failProcess(process);
+                ProcessStatesManager.failProcess(process);
                 assert.isNull(process.end_time);
                 assert.isNull(process.request);
                 assert.equal(ProcessStatusV1.Failed, process.status);
 
                 process = new ProcessStateV1();
                 process.recovery_attempts = 6;
-                ProcessStateManager.requestProcessResponse(process, "request");
+                ProcessStatesManager.requestProcessResponse(process, "request");
                 assert.isNull(process.end_time);
                 assert.equal("request", process.request);
                 assert.equal(7, process.recovery_attempts);
@@ -79,12 +79,12 @@ suite('ProcessStatusManager', () => {
 
                 process = new ProcessStateV1();
                 process.recovery_attempts = 6;
-                ProcessStateManager.abortProcess(process);
+                ProcessStatesManager.abortProcess(process);
                 assert.isNotNull(process.end_time);
                 assert.equal(ProcessStatusV1.Aborted, process.status);
 
                 process = new ProcessStateV1();
-                ProcessStateManager.completeProcess(process);
+                ProcessStatesManager.completeProcess(process);
                 assert.isNotNull(process.end_time);
                 assert.equal(0, process.recovery_attempts);
                 assert.isNull(process.request);

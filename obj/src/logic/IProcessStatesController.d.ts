@@ -24,4 +24,5 @@ export interface IProcessStatesController {
     abortProcess(correlationId: string, state: ProcessStateV1, comment: string, callback: (err: any) => void): void;
     updateProcess(correlationId: string, state: ProcessStateV1, callback: (err: any, state: ProcessStateV1) => void): void;
     deleteProcessById(correlationId: string, processId: string, callback: (err: any, state: ProcessStateV1) => void): void;
+    truncate(correlationId: string, timeout: number, callback: (err: any) => void): void;
 }
