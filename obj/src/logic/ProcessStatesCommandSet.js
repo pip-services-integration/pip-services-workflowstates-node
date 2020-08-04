@@ -27,6 +27,7 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
         this.addCommand(this.makeAbortProcessCommand());
         this.addCommand(this.makeUpdateProcessCommand());
         this.addCommand(this.makeDeleteProcessByIdCommand());
+        this.addCommand(this.makeRequestProcessForResponceCommand());
     }
     makeGetProcessesCommand() {
         return new pip_services3_commons_node_1.Command('get_processes', new pip_services3_commons_node_1.ObjectSchema(true)
@@ -188,17 +189,18 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
         });
     }
     makeSuspendProcessCommand() {
-        return new pip_services3_commons_node_1.Command('susspend_process', new pip_services3_commons_node_1.ObjectSchema(true)
+        return new pip_services3_commons_node_1.Command('suspend_process', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
             .withRequiredProperty('request', pip_services3_commons_node_1.TypeCode.String)
             .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
             .withRequiredProperty('message', new version1_1.MessageV1Schema())
             .withRequiredProperty('timeout', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
             let state = args.getAsObject('state');
+            let request = args.getAsString('request');
             let queueName = args.getAsString('queue_name');
             let message = args.getAsObject('message');
             let timeout = args.getAsLong('timeout');
-            this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, timeout, (err) => {
+            this._controller.suspendProcess(correlationId, state, request, queueName, message, timeout, (err) => {
                 callback(err, null);
             });
         });
@@ -257,6 +259,21 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
             .withRequiredProperty('process_id', pip_services3_commons_node_1.TypeCode.String), (correlationId, args, callback) => {
             let processId = args.getAsString('process_id');
             this._controller.deleteProcessById(correlationId, processId, callback);
+        });
+    }
+    makeRequestProcessForResponceCommand() {
+        return new pip_services3_commons_node_1.Command('request_process_for_responce', new pip_services3_commons_node_1.ObjectSchema(true)
+            .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
+            .withRequiredProperty('request', pip_services3_commons_node_1.TypeCode.String)
+            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withRequiredProperty('message', new version1_1.MessageV1Schema()), (correlationId, args, callback) => {
+            let state = args.getAsObject('state');
+            let request = args.getAsString('request');
+            let queueName = args.getAsString('queue_name');
+            let message = args.getAsObject('message');
+            this._controller.requestProcessForResponse(correlationId, state, request, queueName, message, (err) => {
+                callback(err, null);
+            });
         });
     }
 }

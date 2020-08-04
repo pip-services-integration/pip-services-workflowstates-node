@@ -351,7 +351,7 @@ class ProcessStatesController {
             }
         });
     }
-    requestForResponse(correlationId, state, request, recoveryQueueName, recoveryMessage, callback) {
+    requestProcessForResponse(correlationId, state, request, recoveryQueueName, recoveryMessage, callback) {
         this._getActiveProcess(state, (err, process) => {
             if (err) {
                 callback(err, null);

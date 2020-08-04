@@ -31,6 +31,7 @@ export class ProcessStatesCommandSet extends CommandSet {
         this.addCommand(this.makeAbortProcessCommand());
         this.addCommand(this.makeUpdateProcessCommand());
         this.addCommand(this.makeDeleteProcessByIdCommand());
+        this.addCommand(this.makeRequestProcessForResponceCommand());
     }
 
     private makeGetProcessesCommand(): ICommand {
@@ -265,7 +266,7 @@ export class ProcessStatesCommandSet extends CommandSet {
 
     private makeSuspendProcessCommand(): ICommand {
         return new Command(
-            'susspend_process',
+            'suspend_process',
             new ObjectSchema(true)
                 .withRequiredProperty('state', new ProcessStateV1Schema())
                 .withRequiredProperty('request', TypeCode.String)
@@ -274,15 +275,18 @@ export class ProcessStatesCommandSet extends CommandSet {
                 .withRequiredProperty('timeout', TypeCode.Long),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let state: ProcessStateV1 = args.getAsObject('state');
+                let request = args.getAsString('request');
                 let queueName = args.getAsString('queue_name');
                 let message: MessageV1 = args.getAsObject('message');
                 let timeout = args.getAsLong('timeout');
-                this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, timeout, (err) => {
+                this._controller.suspendProcess(correlationId, state, request, queueName, message, timeout, (err) => {
                     callback(err, null);
                 });
             }
         );
     }
+
+
 
     private makeFailProcessCommand(): ICommand {
         return new Command(
@@ -366,6 +370,26 @@ export class ProcessStatesCommandSet extends CommandSet {
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let processId = args.getAsString('process_id');
                 this._controller.deleteProcessById(correlationId, processId, callback);
+            }
+        );
+    }
+
+    private makeRequestProcessForResponceCommand(): ICommand {
+        return new Command(
+            'request_process_for_responce',
+            new ObjectSchema(true)
+                .withRequiredProperty('state', new ProcessStateV1Schema())
+                .withRequiredProperty('request', TypeCode.String)
+                .withRequiredProperty('queue_name', TypeCode.String)
+                .withRequiredProperty('message', new MessageV1Schema()),
+            (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
+                let state: ProcessStateV1 = args.getAsObject('state');
+                let request = args.getAsString('request');
+                let queueName = args.getAsString('queue_name');
+                let message: MessageV1 = args.getAsObject('message');
+                this._controller.requestProcessForResponse(correlationId, state, request, queueName, message, (err) => {
+                    callback(err, null);
+                });
             }
         );
     }

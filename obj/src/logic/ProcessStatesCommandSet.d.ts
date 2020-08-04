@@ -23,4 +23,5 @@ export declare class ProcessStatesCommandSet extends CommandSet {
     private makeAbortProcessCommand;
     private makeUpdateProcessCommand;
     private makeDeleteProcessByIdCommand;
+    private makeRequestProcessForResponceCommand;
 }

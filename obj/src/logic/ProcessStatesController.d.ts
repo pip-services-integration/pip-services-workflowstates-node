@@ -29,7 +29,7 @@ export declare class ProcessStatesController implements IProcessStatesController
     continueAndRecoverProcess(correlationId: string, state: ProcessStateV1, recoveryQueueName: string, recoveryMessage: MessageV1, recoveryTimeout: number, callback: (err: any) => void): void;
     repeatProcessRecovery(correlationId: string, state: ProcessStateV1, recoveryTimeout: number, callback: (err: any) => void): void;
     rollbackProcess(correlationId: string, state: ProcessStateV1, callback: (err: any) => void): void;
-    requestForResponse(correlationId: string, state: ProcessStateV1, request: string, recoveryQueueName: string, recoveryMessage: MessageV1, callback: (err: any, state: ProcessStateV1) => void): void;
+    requestProcessForResponse(correlationId: string, state: ProcessStateV1, request: string, recoveryQueueName: string, recoveryMessage: MessageV1, callback: (err: any, state: ProcessStateV1) => void): void;
     failAndContinueProcess(correlationId: string, state: ProcessStateV1, errorMessage: string, callback: (err: any) => void): void;
     failAndRecoverProcess(correlationId: string, state: ProcessStateV1, errorMessage: string, recoveryQueueName: string, recoveryMessage: MessageV1, recoveryTimeout: number, callback: (err: any) => void): void;
     failProcess(correlationId: string, state: ProcessStateV1, errorMessage: string, callback: (err: any) => void): void;

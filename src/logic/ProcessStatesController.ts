@@ -394,7 +394,7 @@ export class ProcessStatesController implements IProcessStatesController, IOpena
         });
     }
 
-    public requestForResponse(correlationId: string, state: ProcessStateV1, request: string,
+    public requestProcessForResponse(correlationId: string, state: ProcessStateV1, request: string,
         recoveryQueueName: string, recoveryMessage: MessageV1, callback: (err: any, state: ProcessStateV1) => void): void {
         this._getActiveProcess(state, (err, process) => {
             if (err) {

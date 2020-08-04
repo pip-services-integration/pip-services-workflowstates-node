@@ -342,7 +342,7 @@ suite('ProcessStatesController', () => {
                 })
             },
             (callback) => {
-                _controller.requestForResponse(null, process, "request", "queue", new MessageV1(), (err, processResult) => {
+                _controller.requestProcessForResponse(null, process, "request", "queue", new MessageV1(), (err, processResult) => {
                     assert.isNull(err);
                     assert.equal(process.id, processResult.id);
                     assert.equal("queue", processResult.recovery_queue_name);
@@ -759,7 +759,7 @@ suite('ProcessStatesController', () => {
     });
 
 
-    test("Clear Compensation Message In Process", (done) => {
+    test("Clear Recovery Message In Process", (done) => {
         let process: ProcessStateV1 = new ProcessStateV1();
         process.id = "id";
         process.lock_token = "token";
