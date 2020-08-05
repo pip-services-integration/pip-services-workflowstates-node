@@ -183,13 +183,13 @@ export class ProcessStatesCommandSet extends CommandSet {
                 .withRequiredProperty('state', new ProcessStateV1Schema())
                 .withRequiredProperty('queue_name', TypeCode.String)
                 .withRequiredProperty('message', new MessageV1Schema())
-                .withRequiredProperty('ttl', TypeCode.Long),
+                .withRequiredProperty('timeout', TypeCode.Long),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let state: ProcessStateV1 = args.getAsObject('state');
                 let queueName = args.getAsString('queue_name');
                 let message: MessageV1 = args.getAsObject('message');
-                let ttl = args.getAsLong('ttl');
-                this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, ttl, (err) => {
+                let timeout = args.getAsLong('timeout');
+                this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, timeout, (err) => {
                     callback(err, null);
                 });
             }
@@ -355,9 +355,7 @@ export class ProcessStatesCommandSet extends CommandSet {
                 .withRequiredProperty('state', new ProcessStateV1Schema()),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let state: ProcessStateV1 = args.getAsObject('state');
-                this._controller.updateProcess(correlationId, state, (err) => {
-                    callback(err, null);
-                });
+                this._controller.updateProcess(correlationId, state, callback);
             }
         );
     }
@@ -376,7 +374,7 @@ export class ProcessStatesCommandSet extends CommandSet {
 
     private makeRequestProcessForResponceCommand(): ICommand {
         return new Command(
-            'request_process_for_responce',
+            'request_process_for_response',
             new ObjectSchema(true)
                 .withRequiredProperty('state', new ProcessStateV1Schema())
                 .withRequiredProperty('request', TypeCode.String)
@@ -387,9 +385,7 @@ export class ProcessStatesCommandSet extends CommandSet {
                 let request = args.getAsString('request');
                 let queueName = args.getAsString('queue_name');
                 let message: MessageV1 = args.getAsObject('message');
-                this._controller.requestProcessForResponse(correlationId, state, request, queueName, message, (err) => {
-                    callback(err, null);
-                });
+                this._controller.requestProcessForResponse(correlationId, state, request, queueName, message, callback);
             }
         );
     }

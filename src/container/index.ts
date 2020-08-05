@@ -1,2 +1,1 @@
-// export { ProcessStatesProcess } from './ProcessStatesProcess';
-// export { ProcessStatesLambdaFunction } from './ProcessStatesLambdaFunction';
+export { ProcessStatesProcess } from './ProcessStatesProcess';

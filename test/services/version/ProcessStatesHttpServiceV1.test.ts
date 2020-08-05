@@ -279,7 +279,7 @@ suite('ProcessStatesHttpServiceV1', () => {
     });
 
     test('Return Error If Request For Response Without Process Id', (done) => {
-        rest.post('/v1/process_states/request_process_for_responce',
+        rest.post('/v1/process_states/request_process_for_response',
             {
                 process_type: null,
                 process_key: null,
@@ -728,7 +728,7 @@ suite('ProcessStatesHttpServiceV1', () => {
                 })
             },
             (callback) => {
-                rest.post('/v1/process_states/request_process_for_responce',
+                rest.post('/v1/process_states/request_process_for_response',
                     {
                         state: process,
                         request: "request",
@@ -900,7 +900,7 @@ suite('ProcessStatesHttpServiceV1', () => {
                         state: process,
                         queue_name: "queue name",
                         message: messageEnvelop,
-                        ttl: 0
+                        timeout: 0
                     },
                     (err, req, res, result) => {
                         assert.isNull(err);

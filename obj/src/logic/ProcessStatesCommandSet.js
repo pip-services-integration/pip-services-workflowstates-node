@@ -130,12 +130,12 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
             .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
             .withRequiredProperty('message', new version1_1.MessageV1Schema())
-            .withRequiredProperty('ttl', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
+            .withRequiredProperty('timeout', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
             let state = args.getAsObject('state');
             let queueName = args.getAsString('queue_name');
             let message = args.getAsObject('message');
-            let ttl = args.getAsLong('ttl');
-            this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, ttl, (err) => {
+            let timeout = args.getAsLong('timeout');
+            this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, timeout, (err) => {
                 callback(err, null);
             });
         });
@@ -249,9 +249,7 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
         return new pip_services3_commons_node_1.Command('update_process', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema()), (correlationId, args, callback) => {
             let state = args.getAsObject('state');
-            this._controller.updateProcess(correlationId, state, (err) => {
-                callback(err, null);
-            });
+            this._controller.updateProcess(correlationId, state, callback);
         });
     }
     makeDeleteProcessByIdCommand() {
@@ -262,7 +260,7 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
         });
     }
     makeRequestProcessForResponceCommand() {
-        return new pip_services3_commons_node_1.Command('request_process_for_responce', new pip_services3_commons_node_1.ObjectSchema(true)
+        return new pip_services3_commons_node_1.Command('request_process_for_response', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
             .withRequiredProperty('request', pip_services3_commons_node_1.TypeCode.String)
             .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
@@ -271,9 +269,7 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
             let request = args.getAsString('request');
             let queueName = args.getAsString('queue_name');
             let message = args.getAsObject('message');
-            this._controller.requestProcessForResponse(correlationId, state, request, queueName, message, (err) => {
-                callback(err, null);
-            });
+            this._controller.requestProcessForResponse(correlationId, state, request, queueName, message, callback);
         });
     }
 }

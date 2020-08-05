@@ -1,1 +1,1 @@
-// export { ProcessStatesServiceFactory } from './ProcessStatesServiceFactory';
+export { ProcessStatesServiceFactory } from './ProcessStatesServiceFactory';
