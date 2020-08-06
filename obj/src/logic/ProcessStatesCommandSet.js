@@ -47,8 +47,8 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
     }
     makeStartProcessCommand() {
         return new pip_services3_commons_node_1.Command('start_process', new pip_services3_commons_node_1.ObjectSchema(true)
-            .withRequiredProperty('process_type', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('process_key', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('process_type', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('process_key', pip_services3_commons_node_1.TypeCode.String)
             .withRequiredProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
             .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
             .withRequiredProperty('message', new version1_1.MessageV1Schema())

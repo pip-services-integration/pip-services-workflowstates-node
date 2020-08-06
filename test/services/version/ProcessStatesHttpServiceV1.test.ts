@@ -38,7 +38,7 @@ const PROCESS2: ProcessStateV1 = <ProcessStateV1>{
     type: "proc.type",
     locked_until_time: new Date(),
     last_action_time: new Date(),
-    recovery_time:new Date(Date.now() - 3600),
+    recovery_time: new Date(Date.now() - 3600),
     status: ProcessStatusV1.Running,
     request_id: "req.id2"
 }
@@ -923,7 +923,7 @@ suite('ProcessStatesHttpServiceV1', () => {
         });
     });
 
-    test('Update_Process', (done) => {
+    test('Update Process', (done) => {
 
         let process: ProcessStateV1 = new ProcessStateV1();
         process.id = "id";
@@ -1046,6 +1046,47 @@ suite('ProcessStatesHttpServiceV1', () => {
                 done(err);
             })
     });
+
+
+    test('Start Process', (done) => {
+
+        let message: MessageV1 = {
+            correlation_id: "test_processes1",
+            message_id: "msg_1",
+            message_type: "Order.Msg",
+            sent_time: new Date(Date.now() - 2 * 3600),
+            message: "Sync orders"
+        }
+
+        async.series([
+            (callback) => {
+                rest.post('/v1/process_states/start_process',
+                    {
+                        process_type: "Process.Type1",
+                        process_key: null,
+                        task_type: "Task.TypeX",
+                        queue_name: "queue_x",
+                        message: message,
+                        ttl: 5 * 3600
+                    },
+                    (err, req, res, process) => {
+                        assert.isNull(err);
+                        assert.equal(process.request_id, message.correlation_id);
+                        assert.equal(process.type, "Process.Type1");
+                        assert.equal(process.status, ProcessStatusV1.Starting);
+                        assert.isNotNull(process.start_time);
+                        assert.isNotNull(process.last_action_time);
+                        assert.isNotNull(process.expiration_time);
+                        assert.isNotNull(process.tasks);
+                        assert.equal(process.tasks.length, 1);
+                        assert.isNotNull(process.data);
+                        callback();
+                    });
+            }], (err) => {
+                done(err);
+            })
+    });
+
 
 
 });

@@ -64,19 +64,19 @@ export class ProcessStatesCommandSet extends CommandSet {
         return new Command(
             'start_process',
             new ObjectSchema(true)
-                .withRequiredProperty('process_type', TypeCode.String)
-                .withRequiredProperty('process_key', TypeCode.String)
-                .withRequiredProperty('task_type', TypeCode.String)
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema())
-                .withRequiredProperty('ttl', TypeCode.Long),
+                .withOptionalProperty('process_type', TypeCode.String)
+                .withOptionalProperty('process_key', TypeCode.String)
+                .withOptionalProperty('task_type', TypeCode.String)
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema())
+                .withOptionalProperty('ttl', TypeCode.Long),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let processType = args.getAsString('process_type');
                 let processKey = args.getAsString('process_key');
                 let taskType = args.getAsString('task_type');
                 let queueName = args.getAsString('queue_name');
                 let message: MessageV1 = args.getAsObject('message');
-                let ttl = args.getAsLong('ttl');
+                let ttl = args.getAsLongWithDefault('ttl', 0);
 
                 this._controller.startProcess(correlationId, processType, processKey, taskType, queueName,
                     message, ttl, callback);
@@ -88,19 +88,19 @@ export class ProcessStatesCommandSet extends CommandSet {
         return new Command(
             'activate_or_start_process',
             new ObjectSchema(true)
-                .withRequiredProperty('process_type', TypeCode.String)
-                .withRequiredProperty('process_key', TypeCode.String)
-                .withRequiredProperty('task_type', TypeCode.String)
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema())
-                .withRequiredProperty('ttl', TypeCode.Long),
+                .withOptionalProperty('process_type', TypeCode.String)
+                .withOptionalProperty('process_key', TypeCode.String)
+                .withOptionalProperty('task_type', TypeCode.String)
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema())
+                .withOptionalProperty('ttl', TypeCode.Long),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let processType = args.getAsString('process_type');
                 let processKey = args.getAsString('process_key');
                 let taskType = args.getAsString('task_type');
                 let queueName = args.getAsString('queue_name');
                 let message: MessageV1 = args.getAsObject('message');
-                let ttl = args.getAsLong('ttl');
+                let ttl = args.getAsLongWithDefault('ttl', 0);
 
                 this._controller.activateOrStartProcess(correlationId, processType, processKey, taskType, queueName,
                     message, ttl, callback);
@@ -113,9 +113,9 @@ export class ProcessStatesCommandSet extends CommandSet {
             'activate_process',
             new ObjectSchema(true)
                 .withRequiredProperty('process_id', TypeCode.String)
-                .withRequiredProperty('task_type', TypeCode.String)
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema()),
+                .withOptionalProperty('task_type', TypeCode.String)
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema()),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let processId = args.getAsString('process_id');
                 let taskType = args.getAsString('task_type');
@@ -131,11 +131,11 @@ export class ProcessStatesCommandSet extends CommandSet {
         return new Command(
             'activate_process_by_key',
             new ObjectSchema(true)
-                .withRequiredProperty('process_type', TypeCode.String)
-                .withRequiredProperty('process_key', TypeCode.String)
-                .withRequiredProperty('task_type', TypeCode.String)
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema()),
+                .withOptionalProperty('process_type', TypeCode.String)
+                .withOptionalProperty('process_key', TypeCode.String)
+                .withOptionalProperty('task_type', TypeCode.String)
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema()),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let processType = args.getAsString('process_type');
                 let processKey = args.getAsString('process_key');
@@ -181,14 +181,14 @@ export class ProcessStatesCommandSet extends CommandSet {
             'continue_and_recovery_process',
             new ObjectSchema(true)
                 .withRequiredProperty('state', new ProcessStateV1Schema())
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema())
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema())
                 .withRequiredProperty('timeout', TypeCode.Long),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let state: ProcessStateV1 = args.getAsObject('state');
                 let queueName = args.getAsString('queue_name');
                 let message: MessageV1 = args.getAsObject('message');
-                let timeout = args.getAsLong('timeout');
+                let timeout = args.getAsLongWithDefault('timeout', 0);
                 this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, timeout, (err) => {
                     callback(err, null);
                 });
@@ -248,8 +248,8 @@ export class ProcessStatesCommandSet extends CommandSet {
             new ObjectSchema(true)
                 .withRequiredProperty('state', new ProcessStateV1Schema())
                 .withRequiredProperty('err_msg', TypeCode.String)
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema())
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema())
                 .withRequiredProperty('timeout', TypeCode.Long),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let state: ProcessStateV1 = args.getAsObject('state');
@@ -269,9 +269,9 @@ export class ProcessStatesCommandSet extends CommandSet {
             'suspend_process',
             new ObjectSchema(true)
                 .withRequiredProperty('state', new ProcessStateV1Schema())
-                .withRequiredProperty('request', TypeCode.String)
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema())
+                .withOptionalProperty('request', TypeCode.String)
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema())
                 .withRequiredProperty('timeout', TypeCode.Long),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let state: ProcessStateV1 = args.getAsObject('state');
@@ -378,8 +378,8 @@ export class ProcessStatesCommandSet extends CommandSet {
             new ObjectSchema(true)
                 .withRequiredProperty('state', new ProcessStateV1Schema())
                 .withRequiredProperty('request', TypeCode.String)
-                .withRequiredProperty('queue_name', TypeCode.String)
-                .withRequiredProperty('message', new MessageV1Schema()),
+                .withOptionalProperty('queue_name', TypeCode.String)
+                .withOptionalProperty('message', new MessageV1Schema()),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 let state: ProcessStateV1 = args.getAsObject('state');
                 let request = args.getAsString('request');
