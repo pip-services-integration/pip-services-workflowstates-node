@@ -12,7 +12,7 @@ class ProcessStateV1Schema extends pip_services3_commons_node_1.ObjectSchema {
         this.withRequiredProperty("type", pip_services3_commons_node_3.TypeCode.String);
         this.withOptionalProperty("request_id", pip_services3_commons_node_3.TypeCode.String);
         this.withOptionalProperty("key", pip_services3_commons_node_3.TypeCode.String);
-        this.withOptionalProperty("state", pip_services3_commons_node_3.TypeCode.String);
+        this.withOptionalProperty("status", pip_services3_commons_node_3.TypeCode.String);
         this.withOptionalProperty("start_time", pip_services3_commons_node_3.TypeCode.DateTime);
         this.withOptionalProperty("end_time", pip_services3_commons_node_3.TypeCode.DateTime);
         this.withOptionalProperty("last_action_time", pip_services3_commons_node_3.TypeCode.DateTime);

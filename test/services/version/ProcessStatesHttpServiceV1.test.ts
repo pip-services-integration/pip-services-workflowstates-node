@@ -1065,9 +1065,9 @@ suite('ProcessStatesHttpServiceV1', () => {
                         process_type: "Process.Type1",
                         process_key: null,
                         task_type: "Task.TypeX",
-                        queue_name: "queue_x",
+                        queue_name: null,//"queue_x",
                         message: message,
-                        ttl: 5 * 3600
+                        ttl: null//5 * 3600
                     },
                     (err, req, res, process) => {
                         assert.isNull(err);

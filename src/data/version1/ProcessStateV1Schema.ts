@@ -12,7 +12,7 @@ export class ProcessStateV1Schema extends ObjectSchema {
         this.withRequiredProperty("type", TypeCode.String);
         this.withOptionalProperty("request_id", TypeCode.String);
         this.withOptionalProperty("key", TypeCode.String);
-        this.withOptionalProperty("state", TypeCode.String);
+        this.withOptionalProperty("status", TypeCode.String);
         this.withOptionalProperty("start_time", TypeCode.DateTime);
         this.withOptionalProperty("end_time", TypeCode.DateTime);
         this.withOptionalProperty("last_action_time", TypeCode.DateTime);

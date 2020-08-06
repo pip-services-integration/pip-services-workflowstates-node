@@ -49,42 +49,42 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
         return new pip_services3_commons_node_1.Command('start_process', new pip_services3_commons_node_1.ObjectSchema(true)
             .withOptionalProperty('process_type', pip_services3_commons_node_1.TypeCode.String)
             .withOptionalProperty('process_key', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema())
-            .withRequiredProperty('ttl', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
+            .withOptionalProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema())
+            .withOptionalProperty('ttl', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
             let processType = args.getAsString('process_type');
             let processKey = args.getAsString('process_key');
             let taskType = args.getAsString('task_type');
             let queueName = args.getAsString('queue_name');
             let message = args.getAsObject('message');
-            let ttl = args.getAsLong('ttl');
+            let ttl = args.getAsLongWithDefault('ttl', 0);
             this._controller.startProcess(correlationId, processType, processKey, taskType, queueName, message, ttl, callback);
         });
     }
     makeActivateOrStartProcessCommand() {
         return new pip_services3_commons_node_1.Command('activate_or_start_process', new pip_services3_commons_node_1.ObjectSchema(true)
-            .withRequiredProperty('process_type', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('process_key', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema())
-            .withRequiredProperty('ttl', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
+            .withOptionalProperty('process_type', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('process_key', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema())
+            .withOptionalProperty('ttl', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
             let processType = args.getAsString('process_type');
             let processKey = args.getAsString('process_key');
             let taskType = args.getAsString('task_type');
             let queueName = args.getAsString('queue_name');
             let message = args.getAsObject('message');
-            let ttl = args.getAsLong('ttl');
+            let ttl = args.getAsLongWithDefault('ttl', 0);
             this._controller.activateOrStartProcess(correlationId, processType, processKey, taskType, queueName, message, ttl, callback);
         });
     }
     makeActivateProcessCommand() {
         return new pip_services3_commons_node_1.Command('activate_process', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('process_id', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema()), (correlationId, args, callback) => {
+            .withOptionalProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema()), (correlationId, args, callback) => {
             let processId = args.getAsString('process_id');
             let taskType = args.getAsString('task_type');
             let queueName = args.getAsString('queue_name');
@@ -94,11 +94,11 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
     }
     makeActivateProcessByKeyCommand() {
         return new pip_services3_commons_node_1.Command('activate_process_by_key', new pip_services3_commons_node_1.ObjectSchema(true)
-            .withRequiredProperty('process_type', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('process_key', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema()), (correlationId, args, callback) => {
+            .withOptionalProperty('process_type', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('process_key', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('task_type', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema()), (correlationId, args, callback) => {
             let processType = args.getAsString('process_type');
             let processKey = args.getAsString('process_key');
             let taskType = args.getAsString('task_type');
@@ -128,13 +128,13 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
     makeContinueAndRecoveryProcessCommand() {
         return new pip_services3_commons_node_1.Command('continue_and_recovery_process', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema())
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema())
             .withRequiredProperty('timeout', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
             let state = args.getAsObject('state');
             let queueName = args.getAsString('queue_name');
             let message = args.getAsObject('message');
-            let timeout = args.getAsLong('timeout');
+            let timeout = args.getAsLongWithDefault('timeout', 0);
             this._controller.continueAndRecoverProcess(correlationId, state, queueName, message, timeout, (err) => {
                 callback(err, null);
             });
@@ -175,8 +175,8 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
         return new pip_services3_commons_node_1.Command('fail_and_recover_process', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
             .withRequiredProperty('err_msg', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema())
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema())
             .withRequiredProperty('timeout', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
             let state = args.getAsObject('state');
             let errMsg = args.getAsObject('err_msg');
@@ -191,9 +191,9 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
     makeSuspendProcessCommand() {
         return new pip_services3_commons_node_1.Command('suspend_process', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
-            .withRequiredProperty('request', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema())
+            .withOptionalProperty('request', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema())
             .withRequiredProperty('timeout', pip_services3_commons_node_1.TypeCode.Long), (correlationId, args, callback) => {
             let state = args.getAsObject('state');
             let request = args.getAsString('request');
@@ -263,8 +263,8 @@ class ProcessStatesCommandSet extends pip_services3_commons_node_1.CommandSet {
         return new pip_services3_commons_node_1.Command('request_process_for_response', new pip_services3_commons_node_1.ObjectSchema(true)
             .withRequiredProperty('state', new version1_1.ProcessStateV1Schema())
             .withRequiredProperty('request', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
-            .withRequiredProperty('message', new version1_1.MessageV1Schema()), (correlationId, args, callback) => {
+            .withOptionalProperty('queue_name', pip_services3_commons_node_1.TypeCode.String)
+            .withOptionalProperty('message', new version1_1.MessageV1Schema()), (correlationId, args, callback) => {
             let state = args.getAsObject('state');
             let request = args.getAsString('request');
             let queueName = args.getAsString('queue_name');
