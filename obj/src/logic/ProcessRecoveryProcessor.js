@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessRecoveryProcessor = void 0;
 let async = require('async');
 const pip_services3_commons_node_1 = require("pip-services3-commons-node");
 const pip_services3_components_node_1 = require("pip-services3-components-node");
+const RecoveryController_1 = require("./RecoveryController");
 const ProcessStatusV1_1 = require("../data/version1/ProcessStatusV1");
 class ProcessRecoveryProcessor {
     constructor() {
@@ -18,6 +20,7 @@ class ProcessRecoveryProcessor {
     }
     setReferences(references) {
         this._logger.setReferences(references);
+        this._recoveryController = new RecoveryController_1.RecoveryController(references);
         this._controller = references.getOneRequired(new pip_services3_commons_node_1.Descriptor("pip-services-processstates", "controller", "default", "*", "1.0"));
         this._persistence = references.getOneRequired(new pip_services3_commons_node_1.Descriptor("pip-services-processstates", "persistence", "*", "*", "1.0"));
     }

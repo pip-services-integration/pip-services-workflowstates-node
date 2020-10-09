@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CompositeProcessStatesPersistence = void 0;
 const _ = require('lodash');
 const async = require('async');
 const version1_1 = require("../data/version1");

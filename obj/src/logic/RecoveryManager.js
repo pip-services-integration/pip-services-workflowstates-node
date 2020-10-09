@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RecoveryManager = void 0;
 const ProcessStatusV1_1 = require("../data/version1/ProcessStatusV1");
 class RecoveryManager {
     static isRecoveryDue(state) {

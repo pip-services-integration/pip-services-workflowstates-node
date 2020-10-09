@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TasksManager = void 0;
 let _ = require('lodash');
 const TaskStatusV1_1 = require("../data/version1/TaskStatusV1");
 const TaskStateV1_1 = require("../data/version1/TaskStateV1");

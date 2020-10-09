@@ -29,6 +29,7 @@ export class ProcessRecoveryProcessor implements IConfigurable, IReferenceable, 
 
     public setReferences(references: IReferences): void {
         this._logger.setReferences(references);
+        this._recoveryController = new RecoveryController(references);
         this._controller = references.getOneRequired<IProcessStatesController>(new Descriptor("pip-services-processstates", "controller", "default", "*", "1.0"));
         this._persistence = references.getOneRequired<IProcessStatesPersistence>(new Descriptor("pip-services-processstates", "persistence", "*", "*", "1.0"));
     }

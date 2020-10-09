@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessLockManager = void 0;
 const pip_services3_commons_node_1 = require("pip-services3-commons-node");
 const ProcessLockedExceptionV1_1 = require("../data/version1/ProcessLockedExceptionV1");
 const ProcessInvalidStateExceptionV1_1 = require("../data/version1/ProcessInvalidStateExceptionV1");

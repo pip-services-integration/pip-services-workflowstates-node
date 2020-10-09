@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CompositeProcessStatesMongoDbPersistence = void 0;
 const CompositeProcessStatesPersistence_1 = require("./CompositeProcessStatesPersistence");
 const ProcessStatesMongoDbPersistence_1 = require("./ProcessStatesMongoDbPersistence");
 const ActiveProcessStatesMongoDbPersistence_1 = require("./ActiveProcessStatesMongoDbPersistence");

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessStatesManager = void 0;
 const ProcessStateV1_1 = require("../data/version1/ProcessStateV1");
 const ProcessStoppedExceptionV1_1 = require("../data/version1/ProcessStoppedExceptionV1");
 const ProcessStatusV1_1 = require("../data/version1/ProcessStatusV1");

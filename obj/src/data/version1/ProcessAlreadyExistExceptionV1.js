@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessAlreadyExistExceptionV1 = void 0;
 const ProcessExceptionV1_1 = require("./ProcessExceptionV1");
 class ProcessAlreadyExistExceptionV1 extends ProcessExceptionV1_1.ProcessExceptionV1 {
     /**

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessNotFoundExceptionV1 = void 0;
 const pip_services3_commons_node_1 = require("pip-services3-commons-node");
 const ProcessExceptionV1_1 = require("./ProcessExceptionV1");
 class ProcessNotFoundExceptionV1 extends ProcessExceptionV1_1.ProcessExceptionV1 {

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ActiveProcessStatesMongoDbPersistence = void 0;
 const ProcessStatesMongoDbPersistence_1 = require("./ProcessStatesMongoDbPersistence");
 class ActiveProcessStatesMongoDbPersistence extends ProcessStatesMongoDbPersistence_1.ProcessStatesMongoDbPersistence {
     constructor() {

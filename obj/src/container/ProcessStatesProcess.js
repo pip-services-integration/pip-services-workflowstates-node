@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessStatesProcess = void 0;
 const pip_services3_container_node_1 = require("pip-services3-container-node");
 const ProcessStatesServiceFactory_1 = require("../build/ProcessStatesServiceFactory");
 const pip_services3_rpc_node_1 = require("pip-services3-rpc-node");

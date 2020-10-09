@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessStatusV1 = void 0;
 class ProcessStatusV1 {
 }
 exports.ProcessStatusV1 = ProcessStatusV1;
